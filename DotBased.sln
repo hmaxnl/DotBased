@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotBased", "DotBased\DotBased.csproj", "{7FCF823B-D468-4C07-A4BB-192CD2C7EF57}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CLI", "CLI\CLI.csproj", "{BAC347B8-42D9-42E1-999A-8CDBE73E9A49}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotBased.Log.Serilog", "DotBased.Log.Serilog\DotBased.Log.Serilog.csproj", "{EBBDAF9A-BFC7-4BDC-8C51-0501B59A1DDC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7FCF823B-D468-4C07-A4BB-192CD2C7EF57}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7FCF823B-D468-4C07-A4BB-192CD2C7EF57}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7FCF823B-D468-4C07-A4BB-192CD2C7EF57}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7FCF823B-D468-4C07-A4BB-192CD2C7EF57}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BAC347B8-42D9-42E1-999A-8CDBE73E9A49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BAC347B8-42D9-42E1-999A-8CDBE73E9A49}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BAC347B8-42D9-42E1-999A-8CDBE73E9A49}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BAC347B8-42D9-42E1-999A-8CDBE73E9A49}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EBBDAF9A-BFC7-4BDC-8C51-0501B59A1DDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EBBDAF9A-BFC7-4BDC-8C51-0501B59A1DDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EBBDAF9A-BFC7-4BDC-8C51-0501B59A1DDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EBBDAF9A-BFC7-4BDC-8C51-0501B59A1DDC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

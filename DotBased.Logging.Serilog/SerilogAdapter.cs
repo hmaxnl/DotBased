@@ -2,11 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using DotBased.Logging;
 using Serilog.Events;
 using Serilog.Parsing;
 
-namespace DotBased.Log.Serilog;
+namespace DotBased.Logging.Serilog;
 
 public class SerilogAdapter : LogAdapterBase
 {

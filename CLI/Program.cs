@@ -1,6 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-using DotBased.Log.Serilog;
+using DotBased.Logging.Serilog;
 using DotBased.Logging;
 using Serilog;
 using ILogger = Serilog.ILogger;
@@ -19,11 +19,12 @@ logger.Error(new NullReferenceException("Test exception"),"Test ERROR log!");
 logger.Fatal(new NullReferenceException("Test exception"),"Test FATAL log!");
 
 Console.ReadKey();
+return;
 
 
 ILogger SetupSerilog()
 {
-    LoggerConfiguration logConfig = new LoggerConfiguration()
+    var logConfig = new LoggerConfiguration()
         .MinimumLevel.Verbose()
         .WriteTo.Console(outputTemplate: SerilogAdapter.SampleTemplate);
     return logConfig.CreateLogger();

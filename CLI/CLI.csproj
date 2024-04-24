@@ -9,7 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\DotBased.Log.Serilog\DotBased.Log.Serilog.csproj" />
+      <ProjectReference Include="..\DotBased.Logging.Serilog\DotBased.Logging.Serilog.csproj" />
       <ProjectReference Include="..\DotBased\DotBased.csproj" />
     </ItemGroup>
 

@@ -6,7 +6,6 @@ using Serilog;
 using ILogger = Serilog.ILogger;
 
 var serilogLogger = SetupSerilog();
-
 LogService.AddLogAdapter(new SerilogAdapter(serilogLogger));
 
 var logger = LogService.RegisterLogger(typeof(Program));

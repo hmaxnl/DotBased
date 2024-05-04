@@ -11,6 +11,7 @@ public abstract class LoggerBase(CallerInformation caller, ref Action<LogCapsule
 
     internal readonly Action<LogCapsule> ProcessLog = logProcessorHandler;
 
+    public abstract void Verbose(string message, params object?[]? parameters);
     public abstract void Trace(string message, params object?[]? parameters);
     public abstract void Debug(string message, params object?[]? parameters);
     public abstract void Information(string message, params object?[]? parameters);

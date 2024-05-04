@@ -10,6 +10,18 @@ public class Logger(CallerInformation caller, ref Action<LogCapsule> logProcesso
         ProcessLog(capsule);
     }
 
+    public override void Verbose(string message, params object?[]? parameters)
+    {
+        Log(new LogCapsule()
+        {
+            Logger = this,
+            Message = message,
+            Parameters = parameters,
+            Severity = LogSeverity.Verbose,
+            TimeStamp = DateTime.Now
+        });
+    }
+    
     public override void Trace(string message, params object?[]? parameters)
     {
         Log(new LogCapsule()

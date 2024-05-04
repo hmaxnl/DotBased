@@ -5,6 +5,8 @@ namespace DotBased.Logging;
 /// </summary>
 public interface ILogger
 {
+    public void Verbose(string message, params object?[]? parameters);
+    
     public void Trace(string message, params object?[]? parameters);
 
     public void Debug(string message, params object?[]? parameters);

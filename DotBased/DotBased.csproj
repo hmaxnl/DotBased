@@ -7,8 +7,4 @@
         <LangVersion>default</LangVersion>
     </PropertyGroup>
 
-    <ItemGroup>
-      <Folder Include="Collections\" />
-    </ItemGroup>
-
 </Project>

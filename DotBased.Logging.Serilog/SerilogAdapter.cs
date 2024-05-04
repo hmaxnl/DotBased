@@ -38,6 +38,7 @@ public class SerilogAdapter : LogAdapterBase
         }
         switch (capsule.Severity)
         {
+            case LogSeverity.Verbose:
             case LogSeverity.Trace:
             default:
                 logger.Write(new LogEvent(capsule.TimeStamp, LogEventLevel.Verbose, null, template, properties ?? ArraySegment<LogEventProperty>.Empty, ActivityTraceId.CreateRandom(), ActivitySpanId.CreateRandom()));

@@ -2,10 +2,11 @@ namespace DotBased.Logging;
 
 public enum LogSeverity
 {
-    Trace = 0,
-    Debug = 1,
-    Info = 2,
-    Warning = 3,
-    Error = 4,
-    Fatal = 5
+    Verbose = 0,
+    Trace = 1,
+    Debug = 2,
+    Info = 3,
+    Warning = 4,
+    Error = 5,
+    Fatal = 6
 }

@@ -9,6 +9,7 @@ var serilogLogger = SetupSerilog();
 LogService.AddLogAdapter(new SerilogAdapter(serilogLogger));
 var logger = LogService.RegisterLogger(typeof(Program));
 
+
 Console.ReadKey(); // Hold console app open.
 return;
 

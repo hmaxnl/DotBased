@@ -7,17 +7,9 @@ using ILogger = Serilog.ILogger;
 
 var serilogLogger = SetupSerilog();
 LogService.AddLogAdapter(new SerilogAdapter(serilogLogger));
-
 var logger = LogService.RegisterLogger(typeof(Program));
 
-logger.Trace("Test TRACE log! {StringValue} {AnotherValue}", "WOW", "W0W");
-logger.Debug("Test DEBUG log! {IntVal}", 69);
-logger.Information("Test INFO log! {DoubVal}", 4.20);
-logger.Warning("Test WARNING log! {StrVal} {IntVAl} {StrChar}", "Over", 9000, '!');
-logger.Error(new NullReferenceException("Test exception"),"Test ERROR log!");
-logger.Fatal(new NullReferenceException("Test exception"),"Test FATAL log!");
-
-Console.ReadKey();
+Console.ReadKey(); // Hold console app open.
 return;
 
 

@@ -1,5 +1,8 @@
 namespace DotBased.Logging;
 
+/// <summary>
+/// Log processor, this class runs a task that send the logs (<see cref="LogCapsule"/>) to all adapters that are registered in the <see cref="LogService"/> class.
+/// </summary>
 public class LogProcessor : IDisposable
 {
     public LogProcessor()
@@ -21,8 +24,11 @@ public class LogProcessor : IDisposable
     private readonly ManualResetEvent _threadShutdownEvent = new ManualResetEvent(false);
 
     /// <summary>
-    /// Stop the LogProcessor, the processor cannot be resumed after it is stopped!
+    /// Stop the LogProcessor
     /// </summary>
+    /// <remarks>
+    /// The processor cannot be resumed after it is stopped!
+    /// </remarks>
     public void Stop()
     {
         _threadShutdownEvent.Set();
@@ -42,7 +48,7 @@ public class LogProcessor : IDisposable
         if (!_threadSuspendEvent.WaitOne(0))
             _threadSuspendEvent.Set();
     }
-
+    
     private void ProcessLog()
     {
         try
@@ -79,7 +85,7 @@ public class LogProcessor : IDisposable
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("==================================================================================");
             Console.ForegroundColor = oldColor;
-            //TODO: Write info to disk.
+            //TODO: Write to disk.
         }
     }
 }

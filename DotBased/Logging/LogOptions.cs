@@ -1,5 +1,8 @@
 namespace DotBased.Logging;
 
+/// <summary>
+/// Options for loggers, processor and <see cref="LogService"/>.
+/// </summary>
 public class LogOptions
 {
     /// <summary>

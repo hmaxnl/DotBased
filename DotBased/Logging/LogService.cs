@@ -2,6 +2,9 @@ using System.Reflection;
 
 namespace DotBased.Logging;
 
+/// <summary>
+/// Main log service class, handles the loggers, log processor and adapters.
+/// </summary>
 public static class LogService
 {
     static LogService()
@@ -27,6 +30,25 @@ public static class LogService
         Adapters.Add(logAdapter);
     }
 
+    /// <summary>
+    /// Register a logger that will be used in a class and will live as long as the class.
+    /// This will get the calling assembly and will pass that through ther log adapters.
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// public class Program
+    /// {
+    ///     public Program
+    ///     {
+    ///         logger = LogService.RegisterLogger(nameof(Program));
+    ///     }
+    ///     private ILogger logger;
+    /// }
+    /// </code>
+    /// </example>
+    /// <remarks>At the moment this function will only return the default <see cref="Logger"/> class, this is not configureble at the moment!</remarks>
+    /// <param name="identifier">The identifier name of the logger, this will be passed to the log adapter as the source.</param>
+    /// <returns>The configured <see cref="ILogger"/> implementation that will be configuered in the <see cref="LogOptions"/> at the <see cref="LogService"/> class</returns>
     public static ILogger RegisterLogger(string identifier)
     {
         var asm = Assembly.GetCallingAssembly();
@@ -36,6 +58,9 @@ public static class LogService
     }
 }
 
+/// <summary>
+/// Data struct for holding calling source information.
+/// </summary>
 public struct CallingSource
 {
     private CallingSource(Assembly asm)

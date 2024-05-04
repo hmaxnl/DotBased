@@ -1,5 +1,8 @@
 namespace DotBased.Utilities;
 
+/// <summary>
+/// This class has some generator functions.
+/// </summary>
 public static class Generator
 {
     private static readonly Random Random = new Random();

@@ -1,18 +1,14 @@
 namespace DotBased.Logging;
 
-public class Logger : ILogger
+/// <summary>
+/// Main base logger, this class is the default logger that the <see cref="LogService.RegisterLogger"/> function will return.
+/// </summary>
+public class Logger(string identifier, CallingSource source, ref Action<LogCapsule> logProcessorHandler) : ILogger
 {
-    public Logger(string identifier, CallingSource source, ref Action<LogCapsule> logProcessorHandler)
-    {
-        Identifier = identifier;
-        Source = source;
-        _processLog = logProcessorHandler;
-    }
+    public string Identifier { get; } = identifier;
+    public CallingSource Source { get; } = source;
 
-    public string Identifier { get; }
-    public CallingSource Source { get; }
-
-    private readonly Action<LogCapsule> _processLog;
+    private readonly Action<LogCapsule> _processLog = logProcessorHandler;
     
     public void Log(LogCapsule capsule)
     {

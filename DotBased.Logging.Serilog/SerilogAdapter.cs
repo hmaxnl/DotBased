@@ -20,7 +20,7 @@ public class SerilogAdapter : LogAdapterBase
     private readonly global::Serilog.ILogger _serilogLogger;
     private readonly MessageTemplateParser _messageTemplateParser;
 
-    public override void HandleLog(object? sender, LogCapsule? capsule)
+    public override void HandleLog(object? processor, LogCapsule? capsule)
     {
         if (capsule == null)
             return;

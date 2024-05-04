@@ -1,5 +1,8 @@
 namespace DotBased.Logging;
 
+/// <summary>
+/// The ILogger interface for creating loggers that can be used by the <see cref="LogService"/>
+/// </summary>
 public interface ILogger
 {
     public void Trace(string message, params object?[]? parameters);

@@ -1,10 +1,19 @@
 namespace DotBased.Utilities;
 
+/// <summary>
+/// Suffix functions for multiple types of values
+/// </summary>
 public static class Suffix
 {
     private static readonly string[] SizeSuffixes =
         ["bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
     
+    /// <summary>
+    /// Converts the bytes to the memory suffix.
+    /// </summary>
+    /// <param name="bytes">The bytes to convert</param>
+    /// <param name="decimalPlaces">How manay decimal places will be placed</param>
+    /// <returns>The suffixed bytes in the correct format</returns>
     public static string BytesToSizeSuffix(long bytes, int decimalPlaces = 1)
     {
         if (decimalPlaces < 0)

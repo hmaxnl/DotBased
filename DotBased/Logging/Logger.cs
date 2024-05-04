@@ -2,15 +2,15 @@ namespace DotBased.Logging;
 
 public class Logger : ILogger
 {
-    public Logger(string identifier, CallingAssemblyInfo asmInfo, ref Action<LogCapsule> logProcessorHandler)
+    public Logger(string identifier, CallingSource source, ref Action<LogCapsule> logProcessorHandler)
     {
         Identifier = identifier;
-        CallingAsmInfo = asmInfo;
+        Source = source;
         _processLog = logProcessorHandler;
     }
 
     public string Identifier { get; }
-    public CallingAssemblyInfo CallingAsmInfo { get; }
+    public CallingSource Source { get; }
 
     private readonly Action<LogCapsule> _processLog;
     
@@ -93,5 +93,5 @@ public class Logger : ILogger
         });
     }
 
-    public override int GetHashCode() => HashCode.Combine(Identifier, CallingAsmInfo.AssemblyFullName);
+    public override int GetHashCode() => HashCode.Combine(Identifier, Source.AssemblyFullName);
 }

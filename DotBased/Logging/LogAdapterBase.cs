@@ -12,11 +12,6 @@ public abstract class LogAdapterBase
     public string Id { get; } = Guid.NewGuid().ToString();
     public string AdapterName { get; }
 
-    /*private string[] GetMessageProperties(string message)
-    {
-        return [];
-    }*/
-
     public abstract void HandleLog(object? sender, LogCapsule? capsule);
 
     public override int GetHashCode() => HashCode.Combine(Id, AdapterName);

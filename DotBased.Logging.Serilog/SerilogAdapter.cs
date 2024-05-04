@@ -15,7 +15,7 @@ public class SerilogAdapter : LogAdapterBase
         _messageTemplateParser = new MessageTemplateParser();
     }
 
-    public const string SampleTemplate = "[{Timestamp:HH:mm:ss} - {Caller} -> {AsmCaller}] | {Level:u3}] {Message:lj}{NewLine}{Exception}";
+    public const string SampleTemplate = "[{Timestamp:HH:mm:ss} - {Caller} -> {Source}] | {Level:u3}] {Message:lj}{NewLine}{Exception}";
     
     private readonly global::Serilog.ILogger _serilogLogger;
     private readonly MessageTemplateParser _messageTemplateParser;
@@ -26,7 +26,7 @@ public class SerilogAdapter : LogAdapterBase
             return;
         var baseLogger = capsule.Logger as Logger;
         var logger = _serilogLogger
-            .ForContext("AsmCaller", baseLogger?.CallingAsmInfo.AssemblyName ?? "Static")
+            .ForContext("Source", baseLogger?.Source.AssemblyName ?? "Static")
             .ForContext("Caller", baseLogger?.Identifier);
 
         var template = _messageTemplateParser.Parse(capsule.Message);
@@ -39,6 +39,7 @@ public class SerilogAdapter : LogAdapterBase
         switch (capsule.Severity)
         {
             case LogSeverity.Trace:
+            default:
                 logger.Write(new LogEvent(capsule.TimeStamp, LogEventLevel.Verbose, null, template, properties ?? ArraySegment<LogEventProperty>.Empty, ActivityTraceId.CreateRandom(), ActivitySpanId.CreateRandom()));
                 break;
             case LogSeverity.Debug:

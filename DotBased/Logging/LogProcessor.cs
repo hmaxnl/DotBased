@@ -21,7 +21,7 @@ public class LogProcessor : IDisposable
     private readonly ManualResetEvent _threadShutdownEvent = new ManualResetEvent(false);
 
     /// <summary>
-    /// Stop the LogProcessor, the processor cannot be resumed after stopped!
+    /// Stop the LogProcessor, the processor cannot be resumed after it is stopped!
     /// </summary>
     public void Stop()
     {
@@ -54,7 +54,7 @@ public class LogProcessor : IDisposable
                 if (_threadShutdownEvent.WaitOne(0))
                     break;
 
-                if (_processorQueue.Any())
+                if (_processorQueue.Count != 0)
                 {
                     var capsule = _processorQueue.Dequeue();
                     if (LogService.ShouldLog(LogService.Options.Severity, capsule.Severity))

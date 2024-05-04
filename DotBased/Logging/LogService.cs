@@ -30,22 +30,24 @@ public static class LogService
     public static ILogger RegisterLogger(string identifier)
     {
         var asm = Assembly.GetCallingAssembly();
-        var logger = new Logger(identifier, CallingAssemblyInfo.LoadFromAsm(asm),  ref _loggerSendEvent);
+        var logger = new Logger(identifier, CallingSource.LoadFromAsm(asm),  ref _loggerSendEvent);
         Loggers.Add(logger);
         return logger;
     }
 }
 
-public struct CallingAssemblyInfo
+public struct CallingSource
 {
-    private CallingAssemblyInfo(Assembly asm)
+    private CallingSource(Assembly asm)
     {
-        var asmName = asm.GetName();
+        AssemblySource = asm;
+        var asmName = AssemblySource.GetName();
         AssemblyName = asmName.Name ?? "Unknown";
         AssemblyFullName = asmName.FullName;
     }
-    public static CallingAssemblyInfo LoadFromAsm(Assembly asm) => new CallingAssemblyInfo(asm);
+    public static CallingSource LoadFromAsm(Assembly asm) => new CallingSource(asm);
 
+    public Assembly AssemblySource { get; }
     public string AssemblyName { get; }
     public string AssemblyFullName { get; set; }
 }

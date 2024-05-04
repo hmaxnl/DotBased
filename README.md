@@ -1,2 +1,2 @@
 # DotBased
-A library
+Small library that i use in my projects.

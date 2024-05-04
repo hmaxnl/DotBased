@@ -15,7 +15,7 @@ public class SerilogAdapter : LogAdapterBase
         _messageTemplateParser = new MessageTemplateParser();
     }
 
-    public const string SampleTemplate = "[{Timestamp:HH:mm:ss} - {Caller} -> {Source}] | {Level:u3}] {Message:lj}{NewLine}{Exception}";
+    public const string SampleTemplate = "[{Timestamp:HH:mm:ss} - {Caller}] | {Level:u3}] {Message:lj}{NewLine}{Exception}";
     
     private readonly global::Serilog.ILogger _serilogLogger;
     private readonly MessageTemplateParser _messageTemplateParser;
@@ -24,10 +24,10 @@ public class SerilogAdapter : LogAdapterBase
     {
         if (capsule == null)
             return;
-        var baseLogger = capsule.Logger as Logger;
         var logger = _serilogLogger
-            .ForContext("Source", baseLogger?.Source.AssemblyName ?? "Static")
-            .ForContext("Caller", baseLogger?.Identifier);
+            .ForContext("Assembly", capsule.Logger.Caller.AssemblyName)
+            .ForContext("Source", capsule.Logger.Caller.Source)
+            .ForContext("Caller", capsule.Logger.Caller.Name);
 
         var template = _messageTemplateParser.Parse(capsule.Message);
         IEnumerable<LogEventProperty>? properties = null;

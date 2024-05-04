@@ -19,5 +19,5 @@ public class LogCapsule
     /// <summary>
     /// The logger that generated this capsule
     /// </summary>
-    public ILogger Logger { get; set; }
+    public LoggerBase Logger { get; set; }
 }

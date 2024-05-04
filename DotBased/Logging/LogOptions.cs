@@ -11,8 +11,8 @@ public class LogOptions
     public LogSeverity Severity { get; set; } = LogSeverity.Trace;
 
     /// <summary>
-    /// The function that will build and return the <see cref="ILogger"/> when calling <see cref="LogService.RegisterLogger"/>, so a custom logger can be used.
+    /// The function that will build and return the <see cref="LoggerBase"/> when calling <see cref="LogService.RegisterLogger"/>, so a custom logger based on the <see cref="LoggerBase"/> can be used.
     /// </summary>
-    public Func<string, CallingSource, Action<LogCapsule>, ILogger> LoggerBuilder { get; set; } =
-        (identifier, source, sendEvent) => new Logger(identifier, source, ref sendEvent);
+    public Func<CallerInformation, Action<LogCapsule>, LoggerBase> LoggerBuilder { get; set; } =
+        (identifier, sendEvent) => new Logger(identifier, ref sendEvent);
 }

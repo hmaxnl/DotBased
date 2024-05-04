@@ -1,21 +1,16 @@
 namespace DotBased.Logging;
 
 /// <summary>
-/// Main base logger, this class is the default logger that the <see cref="LogService.RegisterLogger"/> function will return.
+/// Main logger, this class is the default logger that the <see cref="LogService.RegisterLogger"/> function will return.
 /// </summary>
-public class Logger(string identifier, CallingSource source, ref Action<LogCapsule> logProcessorHandler) : ILogger
+public class Logger(CallerInformation caller, ref Action<LogCapsule> logProcessorHandler) : LoggerBase(caller, ref logProcessorHandler)
 {
-    public string Identifier { get; } = identifier;
-    public CallingSource Source { get; } = source;
-
-    private readonly Action<LogCapsule> _processLog = logProcessorHandler;
-    
     public void Log(LogCapsule capsule)
     {
-        _processLog(capsule);
+        ProcessLog(capsule);
     }
 
-    public void Trace(string message, params object?[]? parameters)
+    public override void Trace(string message, params object?[]? parameters)
     {
         Log(new LogCapsule()
         {
@@ -27,7 +22,7 @@ public class Logger(string identifier, CallingSource source, ref Action<LogCapsu
         });
     }
 
-    public void Debug(string message, params object?[]? parameters)
+    public override void Debug(string message, params object?[]? parameters)
     {
         Log(new LogCapsule()
         {
@@ -39,7 +34,7 @@ public class Logger(string identifier, CallingSource source, ref Action<LogCapsu
         });
     }
 
-    public void Information(string message, params object?[]? parameters)
+    public override void Information(string message, params object?[]? parameters)
     {
         Log(new LogCapsule()
         {
@@ -51,7 +46,7 @@ public class Logger(string identifier, CallingSource source, ref Action<LogCapsu
         });
     }
 
-    public void Warning(string message, params object?[]? parameters)
+    public override void Warning(string message, params object?[]? parameters)
     {
         Log(new LogCapsule()
         {
@@ -63,7 +58,7 @@ public class Logger(string identifier, CallingSource source, ref Action<LogCapsu
         });
     }
 
-    public void Error(Exception exception, string message, params object?[]? parameters)
+    public override void Error(Exception exception, string message, params object?[]? parameters)
     {
         Log(new LogCapsule()
         {
@@ -76,7 +71,7 @@ public class Logger(string identifier, CallingSource source, ref Action<LogCapsu
         });
     }
 
-    public void Fatal(Exception exception, string message, params object?[]? parameters)
+    public override void Fatal(Exception exception, string message, params object?[]? parameters)
     {
         Log(new LogCapsule()
         {
@@ -89,5 +84,5 @@ public class Logger(string identifier, CallingSource source, ref Action<LogCapsu
         });
     }
 
-    public override int GetHashCode() => HashCode.Combine(Identifier, Source.AssemblyFullName);
+    public override int GetHashCode() => HashCode.Combine(Caller.Source, Caller.AssemblyFullname);
 }

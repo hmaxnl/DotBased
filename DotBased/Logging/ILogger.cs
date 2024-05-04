@@ -1,7 +1,7 @@
 namespace DotBased.Logging;
 
 /// <summary>
-/// The ILogger interface for creating loggers that can be used by the <see cref="LogService"/>
+/// ILogger interface used by <see cref="LoggerBase"/>
 /// </summary>
 public interface ILogger
 {

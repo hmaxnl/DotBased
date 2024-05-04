@@ -9,7 +9,7 @@ var serilogLogger = SetupSerilog();
 
 LogService.AddLogAdapter(new SerilogAdapter(serilogLogger));
 
-var logger = LogService.RegisterLogger(nameof(Program));
+var logger = LogService.RegisterLogger(typeof(Program));
 
 logger.Trace("Test TRACE log! {StringValue} {AnotherValue}", "WOW", "W0W");
 logger.Debug("Test DEBUG log! {IntVal}", 69);

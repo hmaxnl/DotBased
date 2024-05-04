@@ -46,13 +46,12 @@ public static class LogService
     /// }
     /// </code>
     /// </example>
-    /// <remarks>At the moment this function will only return the default <see cref="Logger"/> class, this is not configureble at the moment!</remarks>
     /// <param name="identifier">The identifier name of the logger, this will be passed to the log adapter as the source.</param>
-    /// <returns>The configured <see cref="ILogger"/> implementation that will be configuered in the <see cref="LogOptions"/> at the <see cref="LogService"/> class</returns>
+    /// <returns>The configured <see cref="ILogger"/> implementation that will be configuered in the <see cref="LogOptions.LoggerBuilder"/> at the <see cref="LogService"/> class</returns>
     public static ILogger RegisterLogger(string identifier)
     {
         var asm = Assembly.GetCallingAssembly();
-        var logger = new Logger(identifier, CallingSource.LoadFromAsm(asm),  ref _loggerSendEvent);
+        var logger = Options.LoggerBuilder.Invoke(identifier, CallingSource.LoadFromAsm(asm), _loggerSendEvent);
         Loggers.Add(logger);
         return logger;
     }

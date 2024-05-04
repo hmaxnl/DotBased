@@ -1,6 +1,5 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-using DotBased;
 using DotBased.Logging.Serilog;
 using DotBased.Logging;
 using Serilog;

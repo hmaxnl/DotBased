@@ -1,5 +1,10 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
+/*
+ * Test CLI application for development of DotBased
+ */
+
+
 using DotBased.Logging.Serilog;
 using DotBased.Logging;
 using Serilog;

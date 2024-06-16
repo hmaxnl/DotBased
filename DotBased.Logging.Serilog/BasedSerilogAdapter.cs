@@ -7,27 +7,18 @@ using Serilog.Parsing;
 
 namespace DotBased.Logging.Serilog;
 
-public class SerilogAdapter : LogAdapterBase
+public class BasedSerilogAdapter(global::Serilog.ILogger serilogLogger) : LogAdapterBase("Serilog adapter")
 {
-    public SerilogAdapter(global::Serilog.ILogger serilogLogger) : base("Serilog adapter")
-    {
-        _serilogLogger = serilogLogger;
-        _messageTemplateParser = new MessageTemplateParser();
-    }
-
-    public const string SampleTemplate = "[{Timestamp:HH:mm:ss} - {Caller}] | {Level:u3}] {Message:lj}{NewLine}{Exception}";
-    
-    private readonly global::Serilog.ILogger _serilogLogger;
-    private readonly MessageTemplateParser _messageTemplateParser;
+    private readonly MessageTemplateParser _messageTemplateParser = new();
 
     public override void HandleLog(object? processor, LogCapsule? capsule)
     {
         if (capsule == null)
             return;
-        var logger = _serilogLogger
-            .ForContext("Assembly", capsule.Logger.Caller.AssemblyName)
-            .ForContext("Source", capsule.Logger.Caller.Source)
-            .ForContext("Caller", capsule.Logger.Caller.Name);
+        var logger = serilogLogger
+            .ForContext(BasedSerilog.ExtraProperties.AssemblyProp, capsule.Logger.Caller.AssemblyName)
+            .ForContext(BasedSerilog.ExtraProperties.SourceProp, capsule.Logger.Caller.Source)
+            .ForContext(BasedSerilog.ExtraProperties.CallerProp, capsule.Logger.Caller.Name);
 
         var template = _messageTemplateParser.Parse(capsule.Message);
         IEnumerable<LogEventProperty>? properties = null;

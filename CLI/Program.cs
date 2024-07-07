@@ -11,7 +11,7 @@ using Serilog;
 using ILogger = Serilog.ILogger;
 
 var serilogLogger = SetupSerilog();
-LogService.AddLogAdapter(new SerilogAdapter(serilogLogger));
+LogService.AddLogAdapter(new BasedSerilogAdapter(serilogLogger));
 var logger = LogService.RegisterLogger(typeof(Program));
 
 logger.Information("Whoah... Hi!");
@@ -24,6 +24,6 @@ ILogger SetupSerilog()
 {
     var logConfig = new LoggerConfiguration()
         .MinimumLevel.Verbose()
-        .WriteTo.Console(outputTemplate: SerilogAdapter.SampleTemplate);
+        .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} - {Caller}->{Assembly}] | {Level:u3}] {Message:lj}{NewLine}{Exception}");
     return logConfig.CreateLogger();
 }

@@ -24,6 +24,6 @@ ILogger SetupSerilog()
 {
     var logConfig = new LoggerConfiguration()
         .MinimumLevel.Verbose()
-        .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} - {Caller}->{Assembly}] | {Level:u3}] {Message:lj}{NewLine}{Exception}");
+        .WriteTo.Console(outputTemplate: BasedSerilog.OutputTemplate);
     return logConfig.CreateLogger();
 }

@@ -8,7 +8,7 @@ namespace DotBased.Logging;
 /// </summary>
 public static class LogService
 {
-    // TODO: Future: add middlewares and chanagable log processor
+    // TODO: Future: add middlewares and changeable log processor
     static LogService()
     {
         Options = new LogOptions();

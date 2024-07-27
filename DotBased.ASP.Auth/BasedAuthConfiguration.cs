@@ -3,7 +3,7 @@ namespace DotBased.ASP.Auth;
 public class BasedAuthConfiguration
 {
     /// <summary>
-    /// Allow users to registrate a user account.
+    /// Allow users to registrate.
     /// </summary>
     public bool AllowRegistration { get; set; }
     //TODO: Callback when a user registers, so the application can handle sending emails or generate a code to complete the registration.

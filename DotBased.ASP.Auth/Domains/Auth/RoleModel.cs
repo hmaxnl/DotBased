@@ -1,3 +1,5 @@
+using DotBased.Objects;
+
 namespace DotBased.ASP.Auth.Domains.Auth;
 
 public class RoleModel
@@ -6,4 +8,5 @@ public class RoleModel
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public List<PermissionModel> Permissions { get; set; } = [];
+    public List<DbObjectAttribute<IConvertible>> Attributes { get; set; } = [];
 }

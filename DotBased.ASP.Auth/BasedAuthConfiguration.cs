@@ -1,3 +1,5 @@
+using DotBased.ASP.Auth.Services;
+
 namespace DotBased.ASP.Auth;
 
 public class BasedAuthConfiguration

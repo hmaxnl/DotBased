@@ -1,5 +1,3 @@
-using DotBased.ASP.Auth.Scheme;
-using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DotBased.ASP.Auth;
@@ -10,19 +8,11 @@ public static class DotBasedAuthDependencyInjection
     /// Use the DotBased authentication implementation
     /// </summary>
     /// <remarks>Use the app.UseAuthentication() and app.UseAuthorization()!</remarks>
-    /// <param name="services">Service colllection</param>
+    /// <param name="services">Service collection</param>
     /// <param name="configurationAction">DotBased auth configuration</param>
-    public static void UseBasedAuth(this IServiceCollection services, Action<BasedAuthConfiguration>? configurationAction = null)
+    public static BasedAuthBuilder UseBasedServerAuth(this IServiceCollection services, Action<BasedAuthConfiguration>? configurationAction = null)
     {
-        var config = new BasedAuthConfiguration();
-        configurationAction?.Invoke(config);
-        services.AddSingleton<BasedAuthConfiguration>(config);
-        
-        services.AddScoped<AuthenticationStateProvider, BasedAuthenticationStateProvider>();
-        services.AddAuthentication(options =>
-        {
-            options.DefaultScheme = BasedAuthenticationHandler.AuthenticationScheme;
-        }).AddScheme<BasedAuthenticationHandlerOptions, BasedAuthenticationHandler>(BasedAuthenticationHandler.AuthenticationScheme, null);
-        services.AddAuthorization();
+        var authBuilder = new BasedAuthBuilder(services, configurationAction);
+        return authBuilder;
     }
 }

@@ -1,5 +1,6 @@
 using DotBased.ASP.Auth.Domains.Auth;
 using DotBased.ASP.Auth.Domains.Identity;
+using DotBased.Objects;
 
 namespace DotBased.ASP.Auth;
 
@@ -32,7 +33,4 @@ public interface IAuthDataProvider
     public Task<Result> UpdateAuthenticationStateAsync(AuthenticationStateModel authenticationState);
     public Task<Result> DeleteAuthenticationStateAsync(AuthenticationStateModel authenticationState);
     public Task<Result<AuthenticationStateModel>> GetAuthenticationStateAsync(string id);
-    
-    // Authorization
-    
 }

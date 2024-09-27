@@ -25,14 +25,18 @@ public class BasedAuthConfiguration
     /// </summary>
     public TimeSpan AuthenticationStateMaxAgeBeforeExpire { get; set; } = TimeSpan.FromDays(7);
     /// <summary>
+    /// How long a session state will be cached (default: 15 min)
+    /// </summary>
+    public TimeSpan CachedAuthSessionLifespan { get; set; } = TimeSpan.FromMinutes(15);
+    /// <summary>
     /// Can be used to seed a default user and/or group for first time use.
     /// </summary>
-    public Action<IAuthDataProvider>? SeedData { get; set; }
+    public Action<IAuthDataRepository>? SeedData { get; set; }
 
-    public Type? AuthDataProviderType { get; private set; }
+    public Type? AuthDataRepositoryType { get; private set; }
 
-    public void SetDataProviderType<TDataProviderType>() where TDataProviderType : IAuthDataProvider =>
-        AuthDataProviderType = typeof(TDataProviderType);
+    public void SetDataRepositoryType<TDataProviderType>() where TDataProviderType : IAuthDataRepository =>
+        AuthDataRepositoryType = typeof(TDataProviderType);
 
     public Type? SessionStateProviderType { get; private set; }
 

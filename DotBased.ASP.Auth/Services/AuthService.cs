@@ -7,20 +7,20 @@ namespace DotBased.ASP.Auth.Services;
 
 public class AuthService
 {
-    public AuthService(IAuthDataProvider dataProvider)
+    public AuthService(AuthDataCache dataCache)
     {
-        _dataProvider = dataProvider;
+        _dataCache = dataCache;
         _logger = LogService.RegisterLogger(typeof(AuthService));
     }
 
-    private readonly IAuthDataProvider _dataProvider;
+    private readonly AuthDataCache _dataCache;
     private readonly ILogger _logger;
 
     public async Task<Result<AuthenticationStateModel>> LoginAsync(LoginModel login)
     {
         if (login.UserName.IsNullOrWhiteSpace())
             return Result<AuthenticationStateModel>.Failed("Username argument is empty!");
-        var userResult = await _dataProvider.GetUserAsync(string.Empty, login.Email, login.UserName);
+        //var userResult = await _dataProvider.GetUserAsync(string.Empty, login.Email, login.UserName);
         //TODO: validate user password and create a session state
         return Result<AuthenticationStateModel>.Failed("");
     }
@@ -29,7 +29,7 @@ public class AuthService
     {
         if (state.IsNullOrWhiteSpace())
             return Result.Failed($"Argument {nameof(state)} is empty!");
-        var stateResult = await _dataProvider.GetAuthenticationStateAsync(state);
+        /*var stateResult = await _dataProvider.GetAuthenticationStateAsync(state);
         if (!stateResult.Success || stateResult.Value == null)
             return stateResult;
         var authState = stateResult.Value;
@@ -38,6 +38,7 @@ public class AuthService
         var updatedStateResult = await _dataProvider.UpdateAuthenticationStateAsync(authState);
         if (updatedStateResult.Success) return updatedStateResult;
         _logger.Warning(updatedStateResult.Message);
-        return updatedStateResult;
+        return updatedStateResult;*/
+        return Result.Failed($"Argument {nameof(state)} is empty!"); // <- TEMP
     }
 }

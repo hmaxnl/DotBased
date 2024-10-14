@@ -5,20 +5,18 @@ namespace DotBased.ASP.Auth;
 
 public class AuthDataCache
 {
-    public AuthDataCache(IAuthDataRepository dataRepository, BasedAuthConfiguration configuration)
+    public AuthDataCache(BasedAuthConfiguration configuration)
     {
-        DataRepository = dataRepository;
         _configuration = configuration;
     }
 
-    public readonly IAuthDataRepository DataRepository;
     private readonly BasedAuthConfiguration _configuration;
 
     private readonly CacheNodeCollection<AuthenticationStateModel> _authenticationStateCollection = [];
 
-    public Result PurgeSessionFromCache(string id) => _authenticationStateCollection.Remove(id) ? Result.Ok() : Result.Failed("Failed to purge session state from cache!");
+    public Result PurgeSessionFromCache(string id) => _authenticationStateCollection.Remove(id) ? Result.Ok() : Result.Failed("Failed to purge session state from cache! Or the session was not cached...");
 
-    public async Task<Result<AuthenticationStateModel>> RequestAuthStateAsync(string id)
+    public async Task<Result<AuthenticationStateModel>> RequestAuthStateAsync(IAuthDataRepository dataRepository, string id)
     {
         if (_authenticationStateCollection.TryGetValue(id, out var node))
         {
@@ -32,7 +30,7 @@ public class AuthDataCache
                 return Result<AuthenticationStateModel>.Ok(node.Object);
         }
         
-        var dbResult = await DataRepository.GetAuthenticationStateAsync(id);
+        var dbResult = await dataRepository.GetAuthenticationStateAsync(id);
         if (!dbResult.Success || dbResult.Value == null)
         {
             _authenticationStateCollection.Remove(id);

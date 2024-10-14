@@ -1,31 +1,64 @@
 namespace DotBased;
 
 /// <summary>
-/// Simple result class for returning a result state or a message and a exception.
+/// Simple result class for returning a result state or a message and an exception.
 /// </summary>
-public class Result(bool success, string message, Exception? exception)
+public class Result
 {
-    public bool Success { get; set; } = success;
-    public string Message { get; set; } = message;
-    public Exception? Exception { get; set; } = exception;
+    public Result(bool success, string message, Exception? exception)
+    {
+        Success = success;
+        Message = message;
+        Exception = exception;
+    }
 
-    public static Result Ok() => new Result(true, string.Empty, null);
-    public static Result Failed(string message, Exception? exception = null) => new Result(false, message, exception);
+    public Result(Result bObj)
+    {
+        Success = bObj.Success;
+        Message = bObj.Message;
+        Exception = bObj.Exception;
+    }
+    
+    public bool Success { get; set; }
+    public string Message { get; set; }
+    public Exception? Exception { get; set; }
+
+    public static Result Ok() => new(true, string.Empty, null);
+    public static Result Failed(string message, Exception? exception = null) => new(false, message, exception);
 }
 
-public class Result<TValue>(bool success, string message, TValue? value, Exception? exception) : Result(success, message, exception)
+public class Result<TValue> : Result
 {
-    public TValue? Value { get; set; } = value;
+    public Result(bool success, string message, TValue? value, Exception? exception) : base(success, message, exception)
+    {
+        Value = value;
+    }
+    public Result(Result bObj) : base(bObj)
+    {
+        
+    }
+    public TValue? Value { get; set; }
 
-    public static Result<TValue> Ok(TValue value) => new Result<TValue>(true, string.Empty, value, null);
+    public static Result<TValue> Ok(TValue value) => new(true, string.Empty, value, null);
 
     public new static Result<TValue> Failed(string message, Exception? exception = null) =>
-        new Result<TValue>(false, message, default, exception);
+        new(false, message, default, exception);
 }
 
-public class ListResult<TItem>(bool success, string message, int totalCount, IEnumerable<TItem>? items, Exception? exception) : Result(success, message, exception)
+public class ListResult<TItem> : Result
 {
-    public readonly IReadOnlyList<TItem> Items = items != null ? new List<TItem>(items) : new List<TItem>();
+    public ListResult(bool success, string message, int totalCount, IEnumerable<TItem>? items, Exception? exception) : base(success, message, exception)
+    {
+        Items = items != null ? new List<TItem>(items) : new List<TItem>();
+        TotalCount = totalCount;
+    }
+
+    public ListResult(Result bObj) : base(bObj)
+    {
+        Items = new List<TItem>();
+    }
+    
+    public readonly IReadOnlyList<TItem> Items;
     /// <summary>
     /// The amount of items that this result contains.
     /// </summary>
@@ -34,11 +67,11 @@ public class ListResult<TItem>(bool success, string message, int totalCount, IEn
     /// <summary>
     /// The total amount of item that is available.
     /// </summary>
-    public int TotalCount { get; } = totalCount;
+    public int TotalCount { get; }
 
     public static ListResult<TItem> Ok(IEnumerable<TItem> items, int totalCount = -1) =>
-        new ListResult<TItem>(true, string.Empty, totalCount, items, null);
+        new(true, string.Empty, totalCount, items, null);
 
     public new static ListResult<TItem> Failed(string message, Exception? exception = null) =>
-        new ListResult<TItem>(false, message, -1,null, exception);
+        new(false, message, -1, null, exception);
 }

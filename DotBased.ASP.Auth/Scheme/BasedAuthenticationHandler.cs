@@ -24,6 +24,7 @@ public class BasedAuthenticationHandler : AuthenticationHandler<BasedAuthenticat
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
+        /*var principal = new ClaimsPrincipal();*/
         var principal = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>() { new Claim(ClaimTypes.Role, "Admin"), new Claim(ClaimTypes.Name, "Anon") }, AuthenticationScheme));
         var ticket = new AuthenticationTicket(principal, AuthenticationScheme);
         return Task.FromResult(AuthenticateResult.Success(ticket));

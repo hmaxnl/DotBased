@@ -14,41 +14,26 @@ public class AuthDataCache
 
     private readonly CacheNodeCollection<AuthenticationStateModel> _authenticationStateCollection = [];
 
-    public Result PurgeSessionFromCache(string id) => _authenticationStateCollection.Remove(id) ? Result.Ok() : Result.Failed("Failed to purge session state from cache! Or the session was not cached...");
+    public Result PurgeSessionState(string id) => _authenticationStateCollection.Remove(id) ? Result.Ok() : Result.Failed("Failed to purge session state from cache! Or the session was not cached...");
 
-    public async Task<Result<AuthenticationStateModel>> RequestAuthStateAsync(IAuthDataRepository dataRepository, string id)
+    public void CacheSessionState(AuthenticationStateModel state) => _authenticationStateCollection.Insert(new CacheNode<AuthenticationStateModel>(state));
+
+    public Result<AuthenticationStateModel> RequestSessionState(string id)
     {
-        if (_authenticationStateCollection.TryGetValue(id, out var node))
+        if (!_authenticationStateCollection.TryGetValue(id, out var node))
+            return Result<AuthenticationStateModel>.Failed("No cached object found!");
+        string failedMsg;
+        if (node.Object != null)
         {
-            if (node.Object == null)
-            {
-                _authenticationStateCollection.Remove(id);
-                return Result<AuthenticationStateModel>.Failed($"Returned object is null, removing entry [{id}] from cache!");
-            }
-
             if (node.IsValidLifespan(_configuration.CachedAuthSessionLifespan))
                 return Result<AuthenticationStateModel>.Ok(node.Object);
+            failedMsg = $"Session has invalid lifespan, removing entry: [{id}] from cache!";
         }
-        
-        var dbResult = await dataRepository.GetAuthenticationStateAsync(id);
-        if (!dbResult.Success || dbResult.Value == null)
-        {
-            _authenticationStateCollection.Remove(id);
-            return Result<AuthenticationStateModel>.Failed("Unknown session state!");
-        }
-
-        if (node == null)
-            node = new CacheNode<AuthenticationStateModel>(dbResult.Value);
         else
-            node.UpdateObject(dbResult.Value);
-        if (node.Object != null)
-            return Result<AuthenticationStateModel>.Ok(node.Object);
-        return node.Object != null ? Result<AuthenticationStateModel>.Ok(node.Object) : Result<AuthenticationStateModel>.Failed("Failed to get db object!");
+            failedMsg = $"Returned object is null, removing entry: [{id}] from cache!";
+        _authenticationStateCollection.Remove(id);
+        return Result<AuthenticationStateModel>.Failed(failedMsg);
     }
-
-    /*
-     *
-     */
 }
 
 public class CacheNode<T> where T : class
@@ -86,4 +71,24 @@ public class CacheNode<T> where T : class
 public class CacheNodeCollection<TItem> : KeyedCollection<string, CacheNode<TItem>> where TItem : class
 {
     protected override string GetKeyForItem(CacheNode<TItem> item) => item.Object?.ToString() ?? string.Empty;
+
+    public new CacheNode<TItem>? this[string id]
+    {
+        get => TryGetValue(id, out CacheNode<TItem>? nodeValue) ? nodeValue : null;
+        set
+        {
+            if (value == null)
+                return;
+            if (TryGetValue(id, out CacheNode<TItem>? nodeValue))
+                Remove(nodeValue);
+            Add(value);
+        }
+    }
+
+    public void Insert(CacheNode<TItem> node)
+    {
+        if (Contains(node))
+            Remove(node);
+        Add(node);
+    }
 }

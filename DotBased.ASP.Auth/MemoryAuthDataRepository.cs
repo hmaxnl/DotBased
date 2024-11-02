@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using DotBased.ASP.Auth.Domains.Auth;
 using DotBased.ASP.Auth.Domains.Identity;
+using DotBased.Extensions;
 
 namespace DotBased.ASP.Auth;
 /// <summary>
@@ -9,21 +10,17 @@ namespace DotBased.ASP.Auth;
 [SuppressMessage("ReSharper", "CollectionNeverUpdated.Local")]
 public class MemoryAuthDataRepository : IAuthDataRepository
 {
-    private readonly List<UserModel> _userList = [];
-    private readonly List<GroupModel> _groupList = [];
-    private readonly List<AuthenticationStateModel> _authenticationStateList = [];
-    
     public async Task<Result> CreateUserAsync(UserModel user)
     {
-        if (_userList.Any(x => x.Id == user.Id || x.Email == user.Email))
+        if (MemoryData.users.Any(x => x.Id == user.Id || x.Email == user.Email))
             return Result.Failed("User already exists.");
-        _userList.Add(user);
+        MemoryData.users.Add(user);
         return Result.Ok();
     }
 
     public async Task<Result> UpdateUserAsync(UserModel user)
     {
-        if (_userList.All(x => x.Id != user.Id))
+        if (MemoryData.users.All(x => x.Id != user.Id))
             return Result.Failed("User does not exist!");
         
         return Result.Ok();
@@ -34,9 +31,16 @@ public class MemoryAuthDataRepository : IAuthDataRepository
         throw new NotImplementedException();
     }
 
-    public Task<Result<UserModel>> GetUserAsync(string id, string email, string username)
+    public async Task<Result<UserModel>> GetUserAsync(string id, string email, string username)
     {
-        throw new NotImplementedException();
+        UserModel? userModel = null;
+        if (!id.IsNullOrWhiteSpace())
+            userModel = MemoryData.users.FirstOrDefault(u => u.Id.Equals(id, StringComparison.OrdinalIgnoreCase));
+        if (!email.IsNullOrWhiteSpace())
+            userModel = MemoryData.users.FirstOrDefault(u => u.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
+        if (!username.IsNullOrWhiteSpace())
+            userModel = MemoryData.users.FirstOrDefault(u => u.UserName.Equals(username, StringComparison.OrdinalIgnoreCase));
+        return userModel != null ? Result<UserModel>.Ok(userModel) : Result<UserModel>.Failed("No user found!");
     }
 
     public Task<ListResult<UserItemModel>> GetUsersAsync(int start = 0, int amount = 30, string search = "")
@@ -69,9 +73,11 @@ public class MemoryAuthDataRepository : IAuthDataRepository
         throw new NotImplementedException();
     }
 
-    public Task<Result> CreateAuthenticationStateAsync(AuthenticationStateModel authenticationState)
+    public async Task<Result> CreateAuthenticationStateAsync(AuthenticationStateModel authenticationState)
     {
-        throw new NotImplementedException();
+        if (MemoryData.AuthenticationStates.Contains(authenticationState)) return Result.Failed("Item already exists!");
+        MemoryData.AuthenticationStates.Add(authenticationState);
+        return Result.Ok();
     }
 
     public Task<Result> UpdateAuthenticationStateAsync(AuthenticationStateModel authenticationState)
@@ -79,13 +85,23 @@ public class MemoryAuthDataRepository : IAuthDataRepository
         throw new NotImplementedException();
     }
 
-    public Task<Result> DeleteAuthenticationStateAsync(AuthenticationStateModel authenticationState)
+    public async Task<Result> DeleteAuthenticationStateAsync(AuthenticationStateModel authenticationState)
     {
-        throw new NotImplementedException();
+        MemoryData.AuthenticationStates.Remove(authenticationState);
+        return Result.Ok();
     }
 
-    public Task<Result<AuthenticationStateModel>> GetAuthenticationStateAsync(string id)
+    public async Task<Result<AuthenticationStateModel>> GetAuthenticationStateAsync(string id)
     {
-        throw new NotImplementedException();
+        var item = MemoryData.AuthenticationStates.FirstOrDefault(x => x.Id == id);
+        if (item == null) return Result<AuthenticationStateModel>.Failed("Could not get the session state!");
+        return Result<AuthenticationStateModel>.Ok(item);
     }
+}
+
+internal static class MemoryData
+{
+    public static readonly List<UserModel> users = [];
+    public static readonly List<GroupModel> Groups = [];
+    public static readonly List<AuthenticationStateModel> AuthenticationStates = [];
 }

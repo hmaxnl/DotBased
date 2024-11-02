@@ -1,4 +1,3 @@
-using DotBased.ASP.Auth.Scheme;
 using DotBased.ASP.Auth.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -23,18 +22,18 @@ public static class DotBasedAuthDependencyInjection
         if (Configuration.AuthDataRepositoryType == null)
             throw new ArgumentNullException(nameof(Configuration.AuthDataRepositoryType), $"No '{nameof(IAuthDataRepository)}' configured!");
         services.AddScoped(typeof(IAuthDataRepository), Configuration.AuthDataRepositoryType);
-        if (Configuration.SessionStateProviderType == null)
+        /*if (Configuration.SessionStateProviderType == null)
             throw new ArgumentNullException(nameof(Configuration.SessionStateProviderType), $"No '{nameof(ISessionStateProvider)}' configured!");
-        services.AddScoped(typeof(ISessionStateProvider), Configuration.SessionStateProviderType);
+        services.AddScoped(typeof(ISessionStateProvider), Configuration.SessionStateProviderType);*/
 
         services.AddSingleton<AuthDataCache>();
-        services.AddScoped<AuthService>();
+        services.AddScoped<SecurityService>();
         
         services.AddScoped<AuthenticationStateProvider, BasedServerAuthenticationStateProvider>();
         services.AddAuthentication(options =>
         {
-            options.DefaultScheme = BasedAuthenticationHandler.AuthenticationScheme;
-        }).AddScheme<BasedAuthenticationHandlerOptions, BasedAuthenticationHandler>(BasedAuthenticationHandler.AuthenticationScheme, null);
+            options.DefaultScheme = BasedAuthDefaults.AuthenticationScheme;
+        });/*.AddScheme<BasedAuthenticationHandlerOptions, BasedAuthenticationHandler>(BasedAuthDefaults.AuthenticationScheme, null);*/
         services.AddAuthorization();
         services.AddCascadingAuthenticationState();
         return services;

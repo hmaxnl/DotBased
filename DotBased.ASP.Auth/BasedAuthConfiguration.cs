@@ -21,6 +21,10 @@ public class BasedAuthConfiguration
     /// </summary>
     public string LogoutPath { get; set; } = string.Empty;
     /// <summary>
+    /// The page that the client will be redirected to after logging out. 
+    /// </summary>
+    public string LoggedOutPath { get; set; } = string.Empty;
+    /// <summary>
     /// The max age before a AuthenticationState will expire (default: 7 days).
     /// </summary>
     public TimeSpan AuthenticationStateMaxAgeBeforeExpire { get; set; } = TimeSpan.FromDays(7);

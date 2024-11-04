@@ -5,54 +5,68 @@ using DotBased.ASP.Auth.Domains.Identity;
 using DotBased.Extensions;
 using DotBased.Logging;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
 namespace DotBased.ASP.Auth.Services;
 
 public class SecurityService
 {
-    public SecurityService(IAuthDataRepository authDataRepository, AuthDataCache dataCache)
+    public SecurityService(IAuthDataRepository authDataRepository, AuthDataCache dataCache, ProtectedLocalStorage localStorage)
     {
         _authDataRepository = authDataRepository;
         _dataCache = dataCache;
+        _localStorage = localStorage;
         _logger = LogService.RegisterLogger(typeof(SecurityService));
     }
 
     private readonly IAuthDataRepository _authDataRepository;
     private readonly AuthDataCache _dataCache;
+    private readonly ProtectedLocalStorage _localStorage;
     private readonly ILogger _logger;
 
-    public async Task<Result<AuthenticationState>> GetAuthenticationFromSession(string id)
+    public async Task<Result<AuthenticationState>> GetAuthenticationStateFromSessionAsync(string id)
     {
         if (id.IsNullOrWhiteSpace())
             return Result<AuthenticationState>.Failed("No valid id!");
-        AuthenticationStateModel? authState = null;
+        AuthenticationStateModel? authStateModel = null;
         var stateCache = _dataCache.RequestSessionState(id);
         if (!stateCache.Success || stateCache.Value == null)
         {
             var stateResult = await _authDataRepository.GetAuthenticationStateAsync(id);
             if (stateResult is { Success: true, Value: not null })
-                authState = stateResult.Value;
+            {
+                authStateModel = stateResult.Value;
+                _dataCache.CacheSessionState(authStateModel);
+            }
         }
         else
-            authState = stateCache.Value;
+        {
+            if (stateCache.Value.Item2 != null)
+                return Result<AuthenticationState>.Ok(stateCache.Value.Item2);
+            authStateModel = stateCache.Value.Item1;
+        }
 
-        if (authState == null)
-            return Result<AuthenticationState>.Failed("Failed to get state!");
+        if (authStateModel == null)
+            return Result<AuthenticationState>.Failed("Failed to get auth state!");
 
-        var userResult = await _authDataRepository.GetUserAsync(authState.UserId, string.Empty, string.Empty);
+        var userResult = await _authDataRepository.GetUserAsync(authStateModel.UserId, string.Empty, string.Empty);
         if (userResult is not { Success: true, Value: not null })
             return Result<AuthenticationState>.Failed("Failed to get user from state!");
         var claims = new List<Claim>()
         {
+            new(ClaimTypes.Sid, userResult.Value.Id),
             new(ClaimTypes.Name, userResult.Value.Name),
             new(ClaimTypes.NameIdentifier, userResult.Value.UserName),
             new(ClaimTypes.Surname, userResult.Value.FamilyName),
             new(ClaimTypes.Email, userResult.Value.Email)
         };
-        claims.AddRange(userResult.Value.Roles.Select(role => new Claim(ClaimTypes.Role, role.Name)).ToList());
+        //TODO: combine group, user roles
+        claims.AddRange(userResult.Value.Groups.Select(group => new Claim(ClaimTypes.GroupSid, group.Id)));
+        claims.AddRange(userResult.Value.Roles.Select(role => new Claim(ClaimTypes.Role, role.Name)));
         var claimsIdentity = new ClaimsIdentity(claims, BasedAuthDefaults.AuthenticationScheme);
-        var auth = new AuthenticationState(new ClaimsPrincipal(claimsIdentity));
-        return Result<AuthenticationState>.Ok(auth);
+        var authState = new AuthenticationState(new ClaimsPrincipal(claimsIdentity));
+        _dataCache.CacheSessionState(authStateModel, authState);
+        return Result<AuthenticationState>.Ok(authState);
     }
 
     public async Task<Result<AuthenticationStateModel>> LoginAsync(LoginModel login)
@@ -86,6 +100,7 @@ public class SecurityService
             if (!authResult.Success)
                 return Result<AuthenticationStateModel>.Failed("Failed to store session to database!");
             _dataCache.CacheSessionState(state);
+            await _localStorage.SetAsync(BasedAuthDefaults.StorageKey, state.Id);
             return Result<AuthenticationStateModel>.Ok(state);
         }
         catch (Exception e)

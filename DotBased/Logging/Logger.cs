@@ -3,13 +3,8 @@ namespace DotBased.Logging;
 /// <summary>
 /// Main logger, this class is the default logger that the <see cref="LogService.RegisterLogger"/> function will return.
 /// </summary>
-public class Logger(CallerInformation caller, ref Action<LogCapsule> logProcessorHandler) : LoggerBase(caller, ref logProcessorHandler)
+public class Logger(LoggerInformation loggerInformation, string name) : LoggerBase(loggerInformation, name)
 {
-    public void Log(LogCapsule capsule)
-    {
-        ProcessLog(capsule);
-    }
-
     public override void Verbose(string message, params object?[]? parameters)
     {
         Log(new LogCapsule()
@@ -96,5 +91,5 @@ public class Logger(CallerInformation caller, ref Action<LogCapsule> logProcesso
         });
     }
 
-    public override int GetHashCode() => HashCode.Combine(Caller.Source, Caller.AssemblyFullname);
+    public override int GetHashCode() => HashCode.Combine(LoggerInformation.TypeFullName, LoggerInformation.AssemblyFullname);
 }

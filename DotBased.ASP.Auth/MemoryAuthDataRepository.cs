@@ -34,11 +34,11 @@ public class MemoryAuthDataRepository : IAuthDataRepository
     public async Task<Result<UserModel>> GetUserAsync(string id, string email, string username)
     {
         UserModel? userModel = null;
-        if (!id.IsNullOrWhiteSpace())
+        if (!id.IsNullOrEmpty())
             userModel = MemoryData.users.FirstOrDefault(u => u.Id.Equals(id, StringComparison.OrdinalIgnoreCase));
-        if (!email.IsNullOrWhiteSpace())
+        if (!email.IsNullOrEmpty())
             userModel = MemoryData.users.FirstOrDefault(u => u.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
-        if (!username.IsNullOrWhiteSpace())
+        if (!username.IsNullOrEmpty())
             userModel = MemoryData.users.FirstOrDefault(u => u.UserName.Equals(username, StringComparison.OrdinalIgnoreCase));
         return userModel != null ? Result<UserModel>.Ok(userModel) : Result<UserModel>.Failed("No user found!");
     }

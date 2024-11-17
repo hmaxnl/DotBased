@@ -1,15 +1,23 @@
+using DotBased.Extensions;
+
 namespace DotBased.Logging;
 
 /// <summary>
 /// Base for creating loggers
 /// </summary>
-/// <param name="caller">The caller information</param>
-/// <param name="logProcessorHandler">The handler where the logs can be send to</param>
-public abstract class LoggerBase(CallerInformation caller, ref Action<LogCapsule> logProcessorHandler) : ILogger
+/// <param name="loggerInformation">The caller information</param>
+public abstract class LoggerBase(LoggerInformation loggerInformation, string name) : ILogger
 {
-    public CallerInformation Caller { get; } = caller;
+    public LoggerInformation LoggerInformation { get; } = loggerInformation;
+    public string Name { get; } = name.IsNullOrEmpty() ? loggerInformation.TypeNamespace : name;
 
-    internal readonly Action<LogCapsule> ProcessLog = logProcessorHandler;
+    private readonly Action<LogCapsule> ProcessLog = LogService.LoggerSendEvent;
+    
+    public void Log(LogCapsule capsule)
+    {
+        ProcessLog(capsule);
+    }
+    
 
     public abstract void Verbose(string message, params object?[]? parameters);
     public abstract void Trace(string message, params object?[]? parameters);

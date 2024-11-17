@@ -7,14 +7,23 @@
 
 using DotBased.Logging.Serilog;
 using DotBased.Logging;
+using DotBased.Utilities;
 using Serilog;
 using ILogger = Serilog.ILogger;
 
+LogService.Initialize(options =>
+{
+    options
+        .AddSeverityFilter("Program", LogSeverity.Verbose)
+        .AddSeverityFilter("DotBased.dll", LogSeverity.Verbose);
+});
+
 var serilogLogger = SetupSerilog();
 LogService.AddLogAdapter(new BasedSerilogAdapter(serilogLogger));
-var logger = LogService.RegisterLogger(typeof(Program));
+var logger = LogService.RegisterLogger<Program>();
 
-logger.Information("Whoah... Hi!");
+logger.Information("Whoah... Hi!, {Param}", "Test!");
+var cult = Culture.GetSystemCultures();
 
 Console.ReadKey(); // Hold console app open.
 return;

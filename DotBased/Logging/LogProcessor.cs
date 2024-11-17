@@ -8,7 +8,7 @@ public class LogProcessor : IDisposable
     public LogProcessor()
     {
         _processorQueue = new Queue<LogCapsule>();
-        IncommingLogHandlerEvent = IncommingLogHandler;
+        IncomingLogHandlerEvent = IncomingLogHandler;
         _processorThread = new Thread(ProcessLog)
         {
             IsBackground = true,
@@ -16,7 +16,7 @@ public class LogProcessor : IDisposable
         };
         _processorThread.Start();
     }
-    public readonly Action<LogCapsule> IncommingLogHandlerEvent;
+    public readonly Action<LogCapsule> IncomingLogHandlerEvent;
     public event EventHandler<LogCapsule>? LogProcessed;
     private readonly Queue<LogCapsule> _processorQueue;
     private readonly Thread _processorThread;
@@ -41,14 +41,14 @@ public class LogProcessor : IDisposable
         Stop();
     }
     
-    private void IncommingLogHandler(LogCapsule e)
+    private void IncomingLogHandler(LogCapsule e)
     {
         _processorQueue.Enqueue(e);
-        // Check is the thread is running, if not wake up the thread.
+        // Check if the thread is running, if not wake up the thread.
         if (!_threadSuspendEvent.WaitOne(0))
             _threadSuspendEvent.Set();
     }
-    
+
     private void ProcessLog()
     {
         try
@@ -63,7 +63,9 @@ public class LogProcessor : IDisposable
                 if (_processorQueue.Count != 0)
                 {
                     var capsule = _processorQueue.Dequeue();
-                    if (LogService.ShouldLog(LogService.Options.Severity, capsule.Severity))
+                    if (!LogService.CanLog(LogService.Options.Severity, capsule.Severity))
+                        continue;
+                    if (LogService.FilterSeverityLog(capsule))
                         LogProcessed?.Invoke(this, capsule);
                 }
                 else

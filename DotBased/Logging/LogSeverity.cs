@@ -8,5 +8,6 @@ public enum LogSeverity
     Info = 3,
     Warning = 4,
     Error = 5,
-    Fatal = 6
+    Fatal = 6,
+    Ignore = 99
 }

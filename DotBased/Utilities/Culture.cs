@@ -1,4 +1,5 @@
 using System.Globalization;
+using DotBased.Logging;
 
 namespace DotBased.Utilities;
 
@@ -6,6 +7,7 @@ public static class Culture
 {
     private static List<CultureInfo> _sysCultures = new List<CultureInfo>();
     private static Dictionary<string, RegionInfo> _regions = new Dictionary<string, RegionInfo>();
+    private static readonly ILogger _logger = LogService.RegisterLogger(typeof(Culture));
 
     /// <summary>
     /// Get all system known cultures.
@@ -14,6 +16,7 @@ public static class Culture
     /// <returns>The list with <see cref="CultureInfo"/>'s the system knows</returns>
     public static IEnumerable<CultureInfo> GetSystemCultures()
     {
+        _logger.Debug("Getting system cultures...");
         if (_sysCultures.Count == 0)
             _sysCultures = CultureInfo.GetCultures(CultureTypes.AllCultures).ToList();
         return _sysCultures;

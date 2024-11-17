@@ -5,6 +5,7 @@ namespace DotBased.Logging;
 /// </summary>
 public interface ILogger
 {
+    public void Log(LogCapsule capsule);
     public void Verbose(string message, params object?[]? parameters);
     
     public void Trace(string message, params object?[]? parameters);
@@ -18,4 +19,6 @@ public interface ILogger
     public void Error(Exception exception, string message, params object?[]? parameters);
 
     public void Fatal(Exception exception, string message, params object?[]? parameters);
+    
+    public string Name { get; }
 }

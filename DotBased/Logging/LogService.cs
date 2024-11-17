@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Reflection;
+using DotBased.Extensions;
 
 namespace DotBased.Logging;
 
@@ -8,52 +9,43 @@ namespace DotBased.Logging;
 /// </summary>
 public static class LogService
 {
-    // TODO: Future: add middlewares and changeable log processor
     static LogService()
     {
         Options = new LogOptions();
-        LoggerSendEvent = LogProcessor.IncommingLogHandlerEvent;
+        LoggerSendEvent = LogProcessor.IncomingLogHandlerEvent;
     }
-    public static bool ShouldLog(LogSeverity maxSeverity, LogSeverity severity) => maxSeverity <= severity;
+    public static bool CanLog(LogSeverity maxSeverity, LogSeverity severity) => maxSeverity <= severity;
     public static LogOptions Options { get; private set; }
     public static LogProcessor LogProcessor { get; private set; } = new LogProcessor();
     
-    private static HashSet<LogAdapterBase> Adapters { get; } = new HashSet<LogAdapterBase>();
-    private static HashSet<LoggerBase> Loggers { get; } = new HashSet<LoggerBase>();
+    private static HashSet<LogAdapterBase> Adapters { get; } = [];
+    private static HashSet<ILogger> Loggers { get; } = [];
 
     /// <summary>
     /// Action for internal communication between loggers and processor
     /// </summary>
-    private static readonly Action<LogCapsule> LoggerSendEvent;
+    internal static readonly Action<LogCapsule> LoggerSendEvent;
 
-    /// <summary>
-    /// Register a logger that will be used in a class and will live as long as the class.
-    /// This will get the calling assembly and will pass that through ther log adapters.
-    /// </summary>
-    /// <example>
-    /// <code>
-    /// public class Program
-    /// {
-    ///     public Program
-    ///     {
-    ///         logger = LogService.RegisterLogger(nameof(Program));
-    ///     }
-    ///     private ILogger logger;
-    /// }
-    /// </code>
-    /// </example>
-    /// <param name="callerType">The type that called the function</param>
-    /// <returns>The configured <see cref="ILogger"/> implementation that will be configuered in the <see cref="LogOptions.LoggerBuilder"/> at the <see cref="LogService"/> class</returns>
-    public static ILogger RegisterLogger(Type callerType)
+    public static void Initialize(Action<LogOptions>? options = null)
     {
-        var logger = Options.LoggerBuilder.Invoke(new CallerInformation(callerType), LoggerSendEvent);
+        Options = new LogOptions();
+        options?.Invoke(Options);
+    }
+
+    public static ILogger RegisterLogger(Type? callerType, string name = "")
+    {
+        var logger = Options.LoggerBuilder.Invoke(new LoggerInformation(callerType), name);
         Loggers.Add(logger);
         return logger;
     }
 
-    public static bool UnregisterLogger(LoggerBase logger) => Loggers.Remove(logger);
+    /// <summary>
+    /// Register a logger.
+    /// </summary>
+    /// <returns>The configured <see cref="ILogger"/> implementation that will be configured in the <see cref="LogOptions.LoggerBuilder"/> at the <see cref="LogService"/> class</returns>
+    public static ILogger RegisterLogger<T>() => RegisterLogger(typeof(T), string.Empty);
 
-    public static ReadOnlyCollection<LoggerBase> GetLoggers => new ReadOnlyCollection<LoggerBase>(Loggers.ToList());
+    public static ReadOnlyCollection<ILogger> GetLoggers => new ReadOnlyCollection<ILogger>(Loggers.ToList());
     
     /// <summary>
     /// Add a log adapter to the service.
@@ -69,7 +61,7 @@ public static class LogService
     /// Removes the log adapter from the service.
     /// </summary>
     /// <param name="adapter">The adapter to remove</param>
-    /// <returns>True if the adapter is succesfully removed otherwise false.</returns>
+    /// <returns>True if the adapter is successfully removed otherwise false.</returns>
     public static bool RemoveLogAdapter(LogAdapterBase adapter)
     {
         if (!Adapters.Contains(adapter)) return false;
@@ -77,28 +69,52 @@ public static class LogService
         return Adapters.Remove(adapter);
     }
 
-    public static ReadOnlyCollection<LogAdapterBase> GetAdapters =>
-        new ReadOnlyCollection<LogAdapterBase>(Adapters.ToList());
+    public static ReadOnlyCollection<LogAdapterBase> GetAdapters => new ReadOnlyCollection<LogAdapterBase>(Adapters.ToList());
+
+    internal static bool FilterSeverityLog(LogCapsule capsule)
+    {
+        if (Options.SeverityFilters.TryGetValue(capsule.Logger.Name, out var namespaceFilter))
+            return CanLog(namespaceFilter.Severity, capsule.Severity);
+        var filterCapsuleNamespace = Options.SeverityFilters.Where(kvp => capsule.Logger.Name.Contains(kvp.Filter)).Select(v => v).ToList();
+        if (filterCapsuleNamespace.Count == 0) return true;
+        var filter = filterCapsuleNamespace.FirstOrDefault();
+        return CanLog(filter.Severity, capsule.Severity);
+    }
 }
 
 
-public readonly struct CallerInformation
+public readonly struct LoggerInformation
 {
-    public CallerInformation(Type type)
+    public LoggerInformation(Type? type)
     {
-        Name = type.Name;
-        Source = type.FullName ?? type.GUID.ToString();
-        Namespace = type.Namespace ?? string.Empty;
-        SourceAssembly = type.Assembly;
+        if (type == null)
+            return;
         
-        var asmName = SourceAssembly.GetName();
-        AssemblyName = asmName.Name ?? "Unknown";
-        AssemblyFullname = asmName.FullName;
+        TypeName = type.Name;
+        TypeFullName = type.FullName ?? string.Empty;
+        TypeNamespace = type.Namespace ?? string.Empty;
+        
+        var module = type.Module;
+        ModuleName = module.Name;
+        ModuleScopeName = module.ScopeName;
+        ModuleFullyQualifiedName = module.FullyQualifiedName;
+        
+        var assemblyName = type.Assembly.GetName();
+        AssemblyName = assemblyName.Name ?? (type.Assembly.GetCustomAttributes(typeof(AssemblyTitleAttribute)).FirstOrDefault() as AssemblyTitleAttribute)?.Title ?? string.Empty;
+        AssemblyFullname = assemblyName.FullName;
+
+        if (TypeFullName.IsNullOrEmpty())
+            TypeFullName = !TypeNamespace.IsNullOrEmpty() ? $"{TypeNamespace}.{TypeName}" : TypeName;
+        if (TypeNamespace.IsNullOrEmpty())
+            TypeNamespace = TypeName;
     }
-    public string Name { get; }
-    public string Source { get; }
-    public string Namespace { get; }
-    public Assembly SourceAssembly { get; }
-    public string AssemblyName { get; }
-    public string AssemblyFullname { get; }
+
+    public string TypeName { get; } = string.Empty;
+    public string TypeFullName { get; } = string.Empty;
+    public string TypeNamespace { get; } = string.Empty;
+    public string AssemblyName { get; } = string.Empty;
+    public string AssemblyFullname { get; } = string.Empty;
+    public string ModuleName { get; } = string.Empty;
+    public string ModuleScopeName { get; } = string.Empty;
+    public string ModuleFullyQualifiedName { get; } = string.Empty;
 }

@@ -8,7 +8,7 @@ namespace DotBased.Collections;
 /// </summary>
 public class InstanceContainer : IDisposable
 {
-    private readonly ILogger _log = LogService.RegisterLogger(typeof(InstanceContainer));
+    private readonly ILogger _log = LogService.RegisterLogger<InstanceContainer>();
     private readonly Dictionary<string, InstanceNode> _tCollection = new Dictionary<string, InstanceNode>();
 
     /// <summary>
@@ -40,7 +40,7 @@ public class InstanceContainer : IDisposable
             case null:
                 break;
             case IDisposable instance when dispose:
-                _log.Debug("Disposing disposable object... (InstanceContainer)");
+                _log.Debug("Disposing disposable object...");
                 instance.Dispose();
                 break;
         }

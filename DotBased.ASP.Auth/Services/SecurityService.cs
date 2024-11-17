@@ -16,7 +16,7 @@ public class SecurityService
         _authDataRepository = authDataRepository;
         _dataCache = dataCache;
         _localStorage = localStorage;
-        _logger = LogService.RegisterLogger(typeof(SecurityService));
+        _logger = LogService.RegisterLogger<SecurityService>();
     }
 
     private readonly IAuthDataRepository _authDataRepository;
@@ -26,7 +26,7 @@ public class SecurityService
 
     public async Task<Result<AuthenticationState>> GetAuthenticationStateFromSessionAsync(string id)
     {
-        if (id.IsNullOrWhiteSpace())
+        if (id.IsNullOrEmpty())
             return Result<AuthenticationState>.Failed("No valid id!");
         AuthenticationStateModel? authStateModel = null;
         var stateCache = _dataCache.RequestSessionState(id);
@@ -75,13 +75,13 @@ public class SecurityService
         {
             UserModel? user = null;
             Result<UserModel> usrResult;
-            if (!login.UserName.IsNullOrWhiteSpace())
+            if (!login.UserName.IsNullOrEmpty())
             {
                 usrResult = await _authDataRepository.GetUserAsync(string.Empty, string.Empty, login.UserName);
                 if (usrResult is { Success: true, Value: not null })
                     user = usrResult.Value;
             }
-            else if (!login.Email.IsNullOrWhiteSpace())
+            else if (!login.Email.IsNullOrEmpty())
             {
                 usrResult = await _authDataRepository.GetUserAsync(string.Empty, login.Email, string.Empty);
                 if (usrResult is { Success: true, Value: not null })
@@ -114,7 +114,7 @@ public class SecurityService
     {
         try
         {
-            if (state.IsNullOrWhiteSpace())
+            if (state.IsNullOrEmpty())
                 return Result.Failed($"Argument {nameof(state)} is empty!");
 
             var stateResult = await _authDataRepository.GetAuthenticationStateAsync(state);

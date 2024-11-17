@@ -15,7 +15,7 @@ public class BasedSerilogEnricher : ILogEventEnricher
             sourcePropValue = appValue.ToString().Replace("\"", "");
 
         var assemblyProperty = propertyFactory.CreateProperty(BasedSerilog.ExtraProperties.AssemblyProp, asmPropValue);
-        var sourceProperty = propertyFactory.CreateProperty(BasedSerilog.ExtraProperties.SourceProp, sourcePropValue);
+        var sourceProperty = propertyFactory.CreateProperty(BasedSerilog.ExtraProperties.FullNameProp, sourcePropValue);
         var callerProperty = propertyFactory.CreateProperty(BasedSerilog.ExtraProperties.CallerProp, sourcePropValue);
         
         logEvent.AddPropertyIfAbsent(assemblyProperty);

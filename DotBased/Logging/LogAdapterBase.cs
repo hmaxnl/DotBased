@@ -1,7 +1,7 @@
 namespace DotBased.Logging;
 
 /// <summary>
-/// The base for creating log adpaters.
+/// The base for creating log adapters.
 /// </summary>
 public abstract class LogAdapterBase
 {
@@ -19,7 +19,7 @@ public abstract class LogAdapterBase
     public string AdapterName { get; }
 
     /// <summary>
-    /// Handle the incomming <see cref="LogCapsule"/> that the <see cref="LogProcessor"/> sends.
+    /// Handle the incoming <see cref="LogCapsule"/> that the <see cref="LogProcessor"/> sends.
     /// </summary>
     /// <param name="processor">The log processor that has processed this log</param>
     /// <param name="capsule">The log capsule, which contains the log information</param>

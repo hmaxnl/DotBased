@@ -16,9 +16,11 @@ public class BasedSerilogAdapter(global::Serilog.ILogger serilogLogger) : LogAda
         if (capsule == null)
             return;
         var logger = serilogLogger
-            .ForContext(BasedSerilog.ExtraProperties.AssemblyProp, capsule.Logger.Caller.AssemblyName)
-            .ForContext(BasedSerilog.ExtraProperties.SourceProp, capsule.Logger.Caller.Source)
-            .ForContext(BasedSerilog.ExtraProperties.CallerProp, capsule.Logger.Caller.Name);
+            .ForContext(BasedSerilog.ExtraProperties.LoggerName, capsule.Logger.Name)
+            .ForContext(BasedSerilog.ExtraProperties.AssemblyProp, capsule.Logger.LoggerInformation.AssemblyName)
+            .ForContext(BasedSerilog.ExtraProperties.FullNameProp, capsule.Logger.LoggerInformation.TypeFullName)
+            .ForContext(BasedSerilog.ExtraProperties.NamespaceProp, capsule.Logger.LoggerInformation.TypeNamespace)
+            .ForContext(BasedSerilog.ExtraProperties.CallerProp, capsule.Logger.LoggerInformation.TypeName);
 
         var template = _messageTemplateParser.Parse(capsule.Message);
         IEnumerable<LogEventProperty>? properties = null;

@@ -23,11 +23,15 @@ public class BasedLogger : Microsoft.Extensions.Logging.ILogger
     private LogCapsule ConstructCapsule<TState>(LogSeverity severity, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
     {
         //TODO: Extract parameters & format
+        var msgTemplate = string.Empty;
         if (state is IEnumerable<KeyValuePair<string, object>> stateEnum)
         {
             foreach (var prop in stateEnum)
             {
-                
+                if (prop is { Key: "{OriginalFormat}", Value: string propValueString })
+                {
+                    msgTemplate = propValueString;
+                }
             }
         }
 

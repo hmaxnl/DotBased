@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+
 namespace DotBased.Logging;
 
 /// <summary>
@@ -7,21 +9,16 @@ public class LogProcessor : IDisposable
 {
     public LogProcessor()
     {
-        _processorQueue = new Queue<LogCapsule>();
+        _canLog = true;
+        _capsuleCollection = new BlockingCollection<LogCapsule>();
         IncomingLogHandlerEvent = IncomingLogHandler;
-        _processorThread = new Thread(ProcessLog)
-        {
-            IsBackground = true,
-            Name = "Log processor thread (DotBased)"
-        };
-        _processorThread.Start();
+        _processTask = Task.Factory.StartNew(ProcessLog);
     }
     public readonly Action<LogCapsule> IncomingLogHandlerEvent;
     public event EventHandler<LogCapsule>? LogProcessed;
-    private readonly Queue<LogCapsule> _processorQueue;
-    private readonly Thread _processorThread;
-    private readonly ManualResetEvent _threadSuspendEvent = new ManualResetEvent(false);
-    private readonly ManualResetEvent _threadShutdownEvent = new ManualResetEvent(false);
+    private bool _canLog;
+    private readonly BlockingCollection<LogCapsule> _capsuleCollection;
+    private readonly Task _processTask;
 
     /// <summary>
     /// Stop the LogProcessor
@@ -31,9 +28,9 @@ public class LogProcessor : IDisposable
     /// </remarks>
     public void Stop()
     {
-        _threadShutdownEvent.Set();
-        _threadSuspendEvent.Set();
-        _processorThread.Join();
+        _canLog = false;
+        _capsuleCollection.CompleteAdding();
+        _processTask.Wait();
     }
 
     public void Dispose()
@@ -43,35 +40,31 @@ public class LogProcessor : IDisposable
     
     private void IncomingLogHandler(LogCapsule e)
     {
-        _processorQueue.Enqueue(e);
-        // Check if the thread is running, if not wake up the thread.
-        if (!_threadSuspendEvent.WaitOne(0))
-            _threadSuspendEvent.Set();
+        if (!_canLog)
+            return;
+        if (!_capsuleCollection.TryAdd(e))
+        {
+            _canLog = false;
+        }
     }
 
     private void ProcessLog()
     {
         try
         {
-            while (true)
+            while (!_capsuleCollection.IsCompleted)
             {
-                _threadSuspendEvent.WaitOne(Timeout.Infinite);
-            
-                if (_threadShutdownEvent.WaitOne(0))
-                    break;
-
-                if (_processorQueue.Count != 0)
+                if (_capsuleCollection.TryTake(out var capsule, Timeout.Infinite))
                 {
-                    var capsule = _processorQueue.Dequeue();
                     if (!LogService.CanLog(LogService.Options.Severity, capsule.Severity))
                         continue;
                     if (LogService.FilterSeverityLog(capsule))
                         LogProcessed?.Invoke(this, capsule);
                 }
-                else
-                    _threadSuspendEvent.Reset();
             }
         }
+        catch (InvalidOperationException)
+        { }
         catch (Exception e)
         {
             // Write exception to the output
@@ -81,7 +74,8 @@ public class LogProcessor : IDisposable
             Console.ForegroundColor = ConsoleColor.Blue;
             Console.Write($"[{DateTime.Now}] ");
             Console.ForegroundColor = oldColor;
-            Console.WriteLine($"[{nameof(LogProcessor)} (DotBased)] Log processor thread failed! No logs are being processed!");
+            Console.WriteLine(
+                $"[{nameof(LogProcessor)} (DotBased)] Log processor thread failed! No logs are being processed!");
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine(e);
             Console.ForegroundColor = ConsoleColor.Yellow;

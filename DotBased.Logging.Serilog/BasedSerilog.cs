@@ -7,7 +7,7 @@ public static class BasedSerilog
     /// <summary>
     /// Default output template with the extra properties that can be used for serilog sinks.
     /// </summary>
-    public const string OutputTemplate = "[{Timestamp:HH:mm:ss} {Level:u3} - {LoggerName}]{NewLine} {Message:lj}{NewLine}{Exception}";
+    public const string OutputTemplate = "[{Timestamp:HH:mm:ss} {Level} - {LoggerName}] {Message:lj}{NewLine}{Exception}";
     
     public static LoggerConfiguration UseBasedExtension(this LoggerConfiguration loggerConfiguration)
     {

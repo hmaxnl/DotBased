@@ -16,7 +16,7 @@ var serilogLogger = SetupSerilog();
 LogService.AddLogAdapter(new BasedSerilogAdapter(serilogLogger));
 
 builder.Logging.ClearProviders();
-builder.Logging.AddDotBased(LogService.Options);
+builder.Logging.AddDotBasedLoggerProvider(LogService.Options);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -24,8 +24,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
-
-
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

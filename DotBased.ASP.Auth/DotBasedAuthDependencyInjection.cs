@@ -18,7 +18,6 @@ public static class DotBasedAuthDependencyInjection
         var Configuration = new BasedAuthConfiguration();
         configurationAction?.Invoke(Configuration);
         
-        
         services.AddSingleton<BasedAuthConfiguration>(Configuration);
         if (Configuration.AuthDataRepositoryType == null)
             throw new ArgumentNullException(nameof(Configuration.AuthDataRepositoryType), $"No '{nameof(IAuthDataRepository)}' configured!");

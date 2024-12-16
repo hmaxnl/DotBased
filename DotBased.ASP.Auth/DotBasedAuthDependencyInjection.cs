@@ -23,9 +23,6 @@ public static class DotBasedAuthDependencyInjection
         if (Configuration.AuthDataRepositoryType == null)
             throw new ArgumentNullException(nameof(Configuration.AuthDataRepositoryType), $"No '{nameof(IAuthDataRepository)}' configured!");
         services.AddScoped(typeof(IAuthDataRepository), Configuration.AuthDataRepositoryType);
-        /*if (Configuration.SessionStateProviderType == null)
-            throw new ArgumentNullException(nameof(Configuration.SessionStateProviderType), $"No '{nameof(ISessionStateProvider)}' configured!");
-        services.AddScoped(typeof(ISessionStateProvider), Configuration.SessionStateProviderType);*/
 
         services.AddSingleton<AuthDataCache>();
         services.AddScoped<SecurityService>();

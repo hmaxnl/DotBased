@@ -7,7 +7,7 @@ using DotBased.Logging;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
-namespace DotBased.ASP.Auth.Services;
+namespace DotBased.ASP.Auth;
 
 public class SecurityService
 {
@@ -60,9 +60,9 @@ public class SecurityService
             new(ClaimTypes.Surname, userResult.Value.FamilyName),
             new(ClaimTypes.Email, userResult.Value.Email)
         };
-        //TODO: combine group, user roles
         claims.AddRange(userResult.Value.Groups.Select(group => new Claim(ClaimTypes.GroupSid, group.Id)));
         claims.AddRange(userResult.Value.Roles.Select(role => new Claim(ClaimTypes.Role, role.Name)));
+        claims.AddRange(userResult.Value.Groups.Select(g => g.Roles).SelectMany(gRolesList => gRolesList, (_, role) => new Claim(ClaimTypes.Role, role.Name)));
         var claimsIdentity = new ClaimsIdentity(claims, BasedAuthDefaults.AuthenticationScheme);
         var authState = new AuthenticationState(new ClaimsPrincipal(claimsIdentity));
         _dataCache.CacheSessionState(authStateModel, authState);

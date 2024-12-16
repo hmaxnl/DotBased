@@ -48,3 +48,18 @@ public class BasedAuthConfiguration
         where TSessionStateProviderType : ISessionStateProvider =>
         SessionStateProviderType = typeof(TSessionStateProviderType);
 }
+
+public class BasedPasswordOptions
+{
+    
+}
+
+public class BasedUserOptions
+{
+    
+}
+
+public class BasedLockoutOptions
+{
+    
+}

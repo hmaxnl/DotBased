@@ -17,6 +17,9 @@ public abstract class AuthorityUserBase<TKey> where TKey : IEquatable<TKey>
     public DateTime CreatedDate { get; set; }
 
     public bool TwoFactorEnabled { get; set; }
+
+    public string ConcurrencyStamp { get; set; }
+    public string SecurityStamp { get; set; }
     
     
     [Protect]

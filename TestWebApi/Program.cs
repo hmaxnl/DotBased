@@ -2,6 +2,7 @@ using DotBased.Logging;
 using DotBased.Logging.MEL;
 using DotBased.Logging.Serilog;
 using Serilog;
+using TestWebApi;
 using ILogger = Serilog.ILogger;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,12 +19,20 @@ LogService.AddLogAdapter(new BasedSerilogAdapter(serilogLogger));
 builder.Logging.ClearProviders();
 builder.Logging.AddDotBasedLoggerProvider(LogService.Options);
 
+/*builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = BasedAuthenticationDefaults.BasedAuthenticationScheme;
+    options.DefaultChallengeScheme = BasedAuthenticationDefaults.BasedAuthenticationScheme;
+}).AddCookie();*/
+
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+await SeedAuthorityData.InitializeData(app.Services);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

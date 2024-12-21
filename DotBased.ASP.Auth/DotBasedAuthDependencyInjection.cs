@@ -30,7 +30,7 @@ public static class DotBasedAuthDependencyInjection
         services.AddAuthentication(options =>
         {
             options.DefaultScheme = BasedAuthDefaults.AuthenticationScheme;
-        });/*.AddScheme<BasedAuthenticationHandlerOptions, BasedAuthenticationHandler>(BasedAuthDefaults.AuthenticationScheme, null);*/
+        });
         services.AddAuthorization();
         services.AddCascadingAuthenticationState();
         return services;

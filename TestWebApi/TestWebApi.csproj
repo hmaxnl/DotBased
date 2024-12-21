@@ -13,6 +13,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\DotBased.AspNet.Authority\DotBased.AspNet.Authority.csproj" />
       <ProjectReference Include="..\DotBased.Logging.MEL\DotBased.Logging.MEL.csproj" />
       <ProjectReference Include="..\DotBased.Logging.Serilog\DotBased.Logging.Serilog.csproj" />
       <ProjectReference Include="..\DotBased\DotBased.csproj" />

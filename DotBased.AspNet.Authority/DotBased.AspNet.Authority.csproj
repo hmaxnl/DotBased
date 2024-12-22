@@ -19,7 +19,6 @@
     <ItemGroup>
       <Folder Include="Authentication\" />
       <Folder Include="Models\Security\" />
-      <Folder Include="Repositories\" />
     </ItemGroup>
 
 </Project>

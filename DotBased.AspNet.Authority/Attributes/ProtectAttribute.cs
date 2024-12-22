@@ -1,7 +1,7 @@
 namespace DotBased.AspNet.Authority.Attributes;
 
 /// <summary>
-/// Indicates that the property should be protected.
+/// Indicates to protect the property before saving to the repository.
 /// </summary>
 [AttributeUsage(AttributeTargets.Property)]
 public class ProtectAttribute : Attribute

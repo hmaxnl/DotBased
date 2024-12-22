@@ -17,7 +17,7 @@ public class AuthorityAttribute
     
     public string BoundId { get; set; } // Bound to User, Group, Role id
 
-    public string? AttributeValue { get; set; }
+    public object? AttributeValue { get; set; }
     
     public string? Type { get; set; } // AspNet.Claim.Role/Property/Data.JSON, Data.Raw, Data.Base64 etc.
 

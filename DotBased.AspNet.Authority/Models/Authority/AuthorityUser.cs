@@ -22,6 +22,8 @@ public abstract class AuthorityUser<TKey> where TKey : IEquatable<TKey>
     
     public bool Enabled { get; set; }
     
+    public bool Confirmed { get; set; }
+    
     public bool Locked { get; set; }
 
     public DateTime LockedDate { get; set; }

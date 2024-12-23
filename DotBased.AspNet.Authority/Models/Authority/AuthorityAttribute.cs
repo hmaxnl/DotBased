@@ -2,7 +2,7 @@ namespace DotBased.AspNet.Authority.Models.Authority;
 
 public class AuthorityAttribute
 {
-    public AuthorityAttribute(string attributeKey, string bound) : this()
+    public AuthorityAttribute(string attributeKey, string bound)
     {
         AttributeKey = attributeKey;
         BoundId = bound;
@@ -10,7 +10,8 @@ public class AuthorityAttribute
 
     public AuthorityAttribute()
     {
-        
+        AttributeKey = string.Empty;
+        BoundId = string.Empty;
     }
 
     public string AttributeKey { get; set; } // ClaimType/Authority.attribute.enabled

@@ -1,12 +1,16 @@
 using DotBased.AspNet.Authority.Interfaces;
+using DotBased.AspNet.Authority.Models.Options;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DotBased.AspNet.Authority;
 
 public static class AuthorityProviderExtensions
 {
-    public static AuthorityBuilder AddAuthorityProvider<TModel>(this IServiceCollection services) where TModel : class
+    public static AuthorityBuilder AddAuthorityProvider<TModel>(this IServiceCollection services, Action<AuthorityOptions> optionsAction) where TModel : class
     {
+        services.AddOptions();
+        // Configure required classes, services, etc.
+        services.Configure<AuthorityOptions>(optionsAction);
         return new AuthorityBuilder(services);
     }
 

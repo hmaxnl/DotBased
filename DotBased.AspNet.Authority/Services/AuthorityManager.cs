@@ -1,6 +1,6 @@
 namespace DotBased.AspNet.Authority.Services;
 
-public class AuthorityService
+public class AuthorityManager<TData>
 {
     public long GenerateVersion() => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 }

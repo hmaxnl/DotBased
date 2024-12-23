@@ -18,4 +18,9 @@ public static class AuthorityProviderExtensions
     {
         return authorityBuilder;
     }
+
+    public static AuthorityBuilder MapAuthorityEndpoints(this AuthorityBuilder builder)
+    {
+        return builder;
+    }
 }

@@ -1,3 +1,4 @@
+using DotBased.AspNet.Authority;
 using DotBased.Logging;
 using DotBased.Logging.MEL;
 using DotBased.Logging.Serilog;
@@ -18,6 +19,11 @@ LogService.AddLogAdapter(new BasedSerilogAdapter(serilogLogger));
 
 builder.Logging.ClearProviders();
 builder.Logging.AddDotBasedLoggerProvider(LogService.Options);
+
+builder.Services.AddAuthority(options =>
+{
+    
+});
 
 /*builder.Services.AddAuthentication(options =>
 {

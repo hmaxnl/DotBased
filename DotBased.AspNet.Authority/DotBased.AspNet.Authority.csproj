@@ -17,7 +17,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Authentication\" />
       <Folder Include="Models\Security\" />
     </ItemGroup>
 

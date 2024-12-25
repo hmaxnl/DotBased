@@ -1,4 +1,4 @@
-namespace DotBased.AspNet.Authority.Interfaces;
+namespace DotBased.AspNet.Authority.Repositories;
 
 public interface IUserRepository<TUser, TId> where TUser : class where TId : IEquatable<TId>
 {

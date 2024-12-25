@@ -1,6 +1,6 @@
 namespace DotBased.AspNet.Authority.Validators;
 
-public interface IUserValidator
+public interface IUserValidator<TUser>
 {
     
 }

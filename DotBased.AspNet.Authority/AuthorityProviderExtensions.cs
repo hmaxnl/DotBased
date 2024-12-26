@@ -21,9 +21,11 @@ public static class AuthorityProviderExtensions
             services.AddOptions();
             services.Configure<AuthorityOptions>(optionsAction);
         }
+        
         services.TryAddScoped<ICryptographer, Cryptographer>();
         services.TryAddScoped<IPasswordHasher, PasswordHasher>();
         services.TryAddScoped<IPasswordValidator<TUser>, PasswordOptionsValidator<TUser>>();
+        services.TryAddScoped<IPasswordValidator<TUser>, PasswordEqualsValidator<TUser>>();
         services.TryAddScoped<IUserValidator<TUser>, UserValidator<TUser>>();
         /*services.TryAddScoped<IEmailVerifier, EmailVerifier>();
         services.TryAddScoped<IPhoneNumberVerifier, PhoneNumberVerifier>();
@@ -43,5 +45,21 @@ public static class AuthorityProviderExtensions
     public static AuthorityBuilder MapAuthorityEndpoints(this AuthorityBuilder builder)
     {
         return builder;
+    }
+
+    private static Type GetBaseGenericArgumentType<TModel>(Type baseType)
+    {
+        var userGenericBaseTypeDefinition = typeof(TModel).BaseType?.GetGenericTypeDefinition();
+        if (userGenericBaseTypeDefinition != null && userGenericBaseTypeDefinition == baseType)
+        {
+            var userBaseGenericArguments = userGenericBaseTypeDefinition.GetGenericArguments();
+            if (userBaseGenericArguments.Length <= 0)
+            {
+                throw new ArgumentException("Base implementation does not have the required generic argument.", nameof(TModel));
+            }
+
+            return userBaseGenericArguments[0];
+        }
+        throw new ArgumentException($"Given object {typeof(TModel).Name} does not have the base implementation type of: {baseType.Name}", nameof(TModel));
     }
 }

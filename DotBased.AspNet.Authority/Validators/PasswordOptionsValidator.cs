@@ -8,12 +8,12 @@ namespace DotBased.AspNet.Authority.Validators;
 /// Validates the password against the options that is configured.
 /// </summary>
 /// <typeparam name="TUser">The user model used.</typeparam>
-public class PasswordOptionsValidator<TUser> : IPasswordValidator<TUser>
+public class PasswordOptionsValidator<TUser> : IPasswordValidator<TUser> where TUser : class
 {
     private const string ValidatorId = "Authority.Validator.Password.Options";
     private const string ValidationBase = "Authority.Validation.Password";
     
-    public async Task<ValidationResult> ValidatePasswordAsync(AuthorityUserManager<TUser> userManager, string password)
+    public async Task<ValidationResult> ValidatePasswordAsync(AuthorityUserManager<TUser> userManager, TUser user, string password)
     {
         if (userManager == null)
         {

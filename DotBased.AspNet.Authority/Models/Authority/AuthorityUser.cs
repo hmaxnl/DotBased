@@ -16,10 +16,13 @@ public class AuthorityUser : AuthorityUser<Guid>
     }
 }
 
-public abstract class AuthorityUser<TKey> where TKey : IEquatable<TKey>
+public abstract class AuthorityUser<TKey> : AuthorityUserBase where TKey : IEquatable<TKey>
 {
     public TKey Id { get; set; }
-    
+}
+
+public abstract class AuthorityUserBase
+{
     public bool Enabled { get; set; }
     
     public bool Confirmed { get; set; }

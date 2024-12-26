@@ -32,6 +32,7 @@ public class AuthorityManager
 
 
     public long GenerateVersion() => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+    
 
     /// <summary>
     /// Protect or unprotect the properties with the <see cref="ProtectAttribute"/>

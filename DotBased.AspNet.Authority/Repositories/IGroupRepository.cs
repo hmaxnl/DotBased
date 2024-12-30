@@ -1,6 +1,6 @@
 namespace DotBased.AspNet.Authority.Repositories;
 
-public interface IGroupRepository<TGroup, TId> where TGroup : class where TId : IEquatable<TId>
+public interface IGroupRepository<TGroup> where TGroup : class
 {
     
 }

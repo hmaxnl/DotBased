@@ -83,11 +83,11 @@ public class AuthorityManager
         _logger.Debug("{HandledPropCount}/{TotalPropCount} protection properties handled!", handledProperties, props.Count);
     }
 
-    public bool IsPropertieProtected<TModel>(string propertieName)
+    public bool IsPropertyProtected<TModel>(string propertyName)
     {
         var protectedProperties = GetProtectedProperties<TModel>();
-        var propertieFound = protectedProperties.Where(propInfo => propInfo.Name == propertieName);
-        return propertieFound.Any();
+        var propertyFound = protectedProperties.Where(propInfo => propInfo.Name == propertyName);
+        return propertyFound.Any();
     }
 
     public List<PropertyInfo> GetProtectedPropertiesValues<TModel>(TModel model)

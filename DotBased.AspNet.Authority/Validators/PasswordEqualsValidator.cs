@@ -1,6 +1,6 @@
+using DotBased.AspNet.Authority.Managers;
 using DotBased.AspNet.Authority.Models.Authority;
 using DotBased.AspNet.Authority.Models.Validation;
-using DotBased.AspNet.Authority.Services;
 
 namespace DotBased.AspNet.Authority.Validators;
 
@@ -10,9 +10,9 @@ public class PasswordEqualsValidator<TUser> : IPasswordValidator<TUser> where TU
     private const string ValidationBase = "Authority.Validation.Password";
     public async Task<ValidationResult> ValidatePasswordAsync(AuthorityUserManager<TUser> userManager, TUser user, string password)
     {
-        if (user == null || user is not AuthorityUserBase authorityUser)
+        if (user is not AuthorityUserBase authorityUser)
         {
-            throw new ArgumentException("Invalid user given!", nameof(user));
+            throw new ArgumentException($"User is not type of {nameof(AuthorityUserBase)}!", nameof(user));
         }
 
         List<ValidationError> errors = [];

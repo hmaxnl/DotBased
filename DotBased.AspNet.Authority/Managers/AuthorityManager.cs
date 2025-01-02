@@ -2,24 +2,21 @@ using System.Reflection;
 using DotBased.AspNet.Authority.Attributes;
 using DotBased.AspNet.Authority.Crypto;
 using DotBased.AspNet.Authority.Models.Options;
-using DotBased.AspNet.Authority.Repositories;
 using DotBased.Logging;
 using Microsoft.Extensions.Options;
 
-namespace DotBased.AspNet.Authority.Services;
+namespace DotBased.AspNet.Authority.Managers;
 
 public class AuthorityManager
 {
     public AuthorityManager(
         IOptions<AuthorityOptions> options,
         IServiceProvider services,
-        IAuthorityRepository repository,
         ICryptographer cryptographer)
     {
         _logger = LogService.RegisterLogger<AuthorityManager>();
         Options = options.Value ?? new AuthorityOptions();
         Services = services;
-        Repository = repository;
         Cryptographer = cryptographer;
     }
 
@@ -27,7 +24,6 @@ public class AuthorityManager
 
     public IServiceProvider Services { get; }
     public AuthorityOptions Options { get; }
-    public IAuthorityRepository Repository { get; }
     public ICryptographer Cryptographer { get; }
 
 
@@ -38,7 +34,7 @@ public class AuthorityManager
     /// Protect or unprotect the properties with the <see cref="ProtectAttribute"/>
     /// </summary>
     /// <param name="data">The data model</param>
-    /// <param name="protection">True for protection false for unprotection.</param>
+    /// <param name="protection">True for protect false for unprotect.</param>
     /// <typeparam name="TModel">The class with the properties to protect.</typeparam>
     public async Task HandlePropertyProtection<TModel>(TModel data, bool protection)
     {
@@ -74,7 +70,7 @@ public class AuthorityManager
             
             if (cryptString == null)
             {
-                _logger.Warning("{Protection} failed for property {PropName}", protection ? "Encyption" : "Decyption", property.Name);
+                _logger.Warning("{Protection} failed for property {PropName}", protection ? "Encryption" : "Decryption", property.Name);
                 continue;
             }
             property.SetValue(data, cryptString);

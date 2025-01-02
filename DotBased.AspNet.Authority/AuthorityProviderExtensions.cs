@@ -1,7 +1,7 @@
 using DotBased.AspNet.Authority.Crypto;
+using DotBased.AspNet.Authority.Managers;
 using DotBased.AspNet.Authority.Models.Authority;
 using DotBased.AspNet.Authority.Models.Options;
-using DotBased.AspNet.Authority.Services;
 using DotBased.AspNet.Authority.Validators;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;

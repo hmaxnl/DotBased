@@ -1,4 +1,4 @@
-namespace DotBased.AspNet.Authority.Services;
+namespace DotBased.AspNet.Authority.Managers;
 
 public class AuthorityRoleManager<TRole>
 {

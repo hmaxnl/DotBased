@@ -64,6 +64,34 @@ public class AuthorityUserManager<TUser> where TUser : class
         return errors.Count > 0 ? ValidationResult.Failed(errors) : ValidationResult.Ok();
     }
 
+    public async Task<ListResult<TUser>> SearchUsersAsync(string query, int maxResults = 20, int offset = 0)
+    {
+        var searchResult = await UserRepository.GetUsersAsync(query, maxResults, offset);
+        return searchResult.Item1 == null ? ListResult<TUser>.Failed("No results!") : ListResult<TUser>.Ok(searchResult.Item1, searchResult.Item2);
+    }
+
+    public async Task<AuthorityResult<TUser>> UpdatePasswordAsync(TUser user, string password)
+    {
+        if (user is not AuthorityUserBase userBase)
+        {
+            return AuthorityResult<TUser>.Error($"Given user is not of base type {nameof(AuthorityUserBase)}!");
+        }
+        
+        var passwordValidation = await ValidatePasswordAsync(user, password);
+        if (!passwordValidation.Success)
+        {
+            List<ValidationError> errors = [];
+            errors.AddRange(passwordValidation.Errors);
+            return AuthorityResult<TUser>.Failed(errors, ResultFailReason.Validation);
+        }
+
+        userBase.PasswordHash = await PasswordHasher.HashPasswordAsync(password);
+        userBase.SecurityVersion = AuthorityManager.GenerateVersion();
+
+        var updateResult = await UserRepository.UpdateUserAsync(user);
+        return updateResult == null ? AuthorityResult<TUser>.Error("Failed to save updates!") : AuthorityResult<TUser>.Ok(updateResult);
+    }
+
     public async Task<AuthorityResult<TUser>> CreateUserAsync(TUser userModel, string password)
     {
         if (userModel is not AuthorityUserBase userBase)
@@ -81,10 +109,8 @@ public class AuthorityUserManager<TUser> where TUser : class
             return AuthorityResult<TUser>.Failed(errors, ResultFailReason.Validation);
         }
         
-        var version = AuthorityManager.GenerateVersion();
-        userBase.Version = version;
-        var securityVersion = AuthorityManager.GenerateVersion();
-        userBase.SecurityVersion = securityVersion;
+        userBase.Version = AuthorityManager.GenerateVersion();
+        userBase.SecurityVersion = AuthorityManager.GenerateVersion();
         var hashedPassword = await PasswordHasher.HashPasswordAsync(password);
         userBase.PasswordHash = hashedPassword;
 
@@ -94,4 +120,18 @@ public class AuthorityUserManager<TUser> where TUser : class
             ? AuthorityResult<TUser>.Ok(userCreationResult)
             : AuthorityResult<TUser>.Error("Failed to create user in repository!");
     }
+
+    public async Task<Result<TUser>> UpdateUserAsync(TUser model)
+    {
+        var updateResult = await UserRepository.UpdateUserAsync(model);
+        return updateResult != null ? Result<TUser>.Ok(updateResult) : Result<TUser>.Failed("Failed to update user in repository!");
+    }
+
+    public async Task<bool> DeleteUserAsync(TUser model)
+    {
+        var deleteResult = await UserRepository.DeleteUserAsync(model);
+        return deleteResult;
+    }
+    
+    
 }

@@ -1,6 +1,5 @@
 using DotBased.AspNet.Authority.Crypto;
 using DotBased.AspNet.Authority.Managers;
-using DotBased.AspNet.Authority.Models.Authority;
 using DotBased.AspNet.Authority.Models.Options;
 using DotBased.AspNet.Authority.Validators;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,10 +10,6 @@ namespace DotBased.AspNet.Authority;
 public static class AuthorityProviderExtensions
 {
     public static AuthorityBuilder AddAuthority(this IServiceCollection services, Action<AuthorityOptions>? optionsAction = null)
-        => services.AddAuthority<AuthorityUser, AuthorityGroup, AuthorityRole>(optionsAction);
-
-    public static AuthorityBuilder AddAuthority<TUser, TGroup, TRole>(this IServiceCollection services, Action<AuthorityOptions>? optionsAction = null)
-        where TUser : class where TGroup : class where TRole : class
     {
         if (optionsAction != null)
         {
@@ -24,16 +19,16 @@ public static class AuthorityProviderExtensions
         
         services.TryAddScoped<ICryptographer, Cryptographer>();
         services.TryAddScoped<IPasswordHasher, PasswordHasher>();
-        services.TryAddScoped<IPasswordValidator<TUser>, PasswordOptionsValidator<TUser>>();
-        services.TryAddScoped<IPasswordValidator<TUser>, PasswordEqualsValidator<TUser>>();
-        services.TryAddScoped<IUserValidator<TUser>, UserValidator<TUser>>();
+        services.TryAddScoped<IPasswordValidator, PasswordOptionsValidator>();
+        services.TryAddScoped<IPasswordValidator, PasswordEqualsValidator>();
+        services.TryAddScoped<IUserValidator, UserValidator>();
         /*services.TryAddScoped<IEmailVerifier, EmailVerifier>();
         services.TryAddScoped<IPhoneNumberVerifier, PhoneNumberVerifier>();
         services.TryAddScoped<IUserVerifier, UserVerifier>();*/
         services.TryAddScoped<AuthorityManager>();
-        services.TryAddScoped<AuthorityUserManager<TUser>>();
-        services.TryAddScoped<AuthorityGroupManager<TGroup>>();
-        services.TryAddScoped<AuthorityRoleManager<TRole>>();
+        services.TryAddScoped<AuthorityUserManager>();
+        services.TryAddScoped<AuthorityGroupManager>();
+        services.TryAddScoped<AuthorityRoleManager>();
         return new AuthorityBuilder(services);
     }
 

@@ -8,16 +8,16 @@ using DotBased.Logging;
 
 namespace DotBased.AspNet.Authority.Managers;
 
-public class AuthorityUserManager<TUser> where TUser : class
+public class AuthorityUserManager
 {
     public AuthorityUserManager(
         AuthorityManager manager,
-        IUserRepository<TUser> userRepository,
+        IUserRepository userRepository,
         IPasswordHasher passwordHasher,
-        IEnumerable<IPasswordValidator<TUser>>? passwordValidators,
-        IEnumerable<IUserValidator<TUser>>? userValidators)
+        IEnumerable<IPasswordValidator>? passwordValidators,
+        IEnumerable<IUserValidator>? userValidators)
     {
-        _logger = LogService.RegisterLogger<AuthorityUserManager<TUser>>();
+        _logger = LogService.RegisterLogger<AuthorityUserManager>();
         AuthorityManager = manager;
         UserRepository = userRepository;
         PasswordHasher = passwordHasher;
@@ -29,14 +29,14 @@ public class AuthorityUserManager<TUser> where TUser : class
 
     private readonly ILogger _logger;
     public AuthorityManager AuthorityManager { get; }
-    public IUserRepository<TUser> UserRepository { get; }
+    public IUserRepository UserRepository { get; }
     
     public IPasswordHasher PasswordHasher { get; }
     
-    public IEnumerable<IPasswordValidator<TUser>> PasswordValidators { get; } = [];
-    public IEnumerable<IUserValidator<TUser>> UserValidators { get; } = [];
+    public IEnumerable<IPasswordValidator> PasswordValidators { get; } = [];
+    public IEnumerable<IUserValidator> UserValidators { get; } = [];
 
-    public async Task<ValidationResult> ValidatePasswordAsync(TUser user, string password)
+    public async Task<ValidationResult> ValidatePasswordAsync(AuthorityUser user, string password)
     {
         List<ValidationError> errors = [];
         foreach (var validator in PasswordValidators)
@@ -50,7 +50,7 @@ public class AuthorityUserManager<TUser> where TUser : class
         return errors.Count > 0 ? ValidationResult.Failed(errors) : ValidationResult.Ok();
     }
 
-    public async Task<ValidationResult> ValidateUserAsync(TUser user)
+    public async Task<ValidationResult> ValidateUserAsync(AuthorityUser user)
     {
         List<ValidationError> errors = [];
         foreach (var userValidator in UserValidators)
@@ -64,41 +64,31 @@ public class AuthorityUserManager<TUser> where TUser : class
         return errors.Count > 0 ? ValidationResult.Failed(errors) : ValidationResult.Ok();
     }
 
-    public async Task<ListResult<TUser>> SearchUsersAsync(string query, int maxResults = 20, int offset = 0)
+    public async Task<ListResult<AuthorityUser>> SearchUsersAsync(string query, int maxResults = 20, int offset = 0)
     {
-        var searchResult = await UserRepository.GetUsersAsync(query, maxResults, offset);
-        return searchResult.Item1 == null ? ListResult<TUser>.Failed("No results!") : ListResult<TUser>.Ok(searchResult.Item1, searchResult.Item2);
+        var searchResult = await UserRepository.GetAuthorityUsersAsync(query, maxResults, offset);
+        return searchResult.Item1 == null ? ListResult<AuthorityUser>.Failed("No results!") : ListResult<AuthorityUser>.Ok(searchResult.Item1, searchResult.Item2);
     }
 
-    public async Task<AuthorityResult<TUser>> UpdatePasswordAsync(TUser user, string password)
+    public async Task<AuthorityResult<AuthorityUser>> UpdatePasswordAsync(AuthorityUser user, string password)
     {
-        if (user is not AuthorityUserBase userBase)
-        {
-            return AuthorityResult<TUser>.Error($"Given user is not of base type {nameof(AuthorityUserBase)}!");
-        }
-        
         var passwordValidation = await ValidatePasswordAsync(user, password);
         if (!passwordValidation.Success)
         {
             List<ValidationError> errors = [];
             errors.AddRange(passwordValidation.Errors);
-            return AuthorityResult<TUser>.Failed(errors, ResultFailReason.Validation);
+            return AuthorityResult<AuthorityUser>.Failed(errors, ResultFailReason.Validation);
         }
 
-        userBase.PasswordHash = await PasswordHasher.HashPasswordAsync(password);
-        userBase.SecurityVersion = AuthorityManager.GenerateVersion();
+        user.PasswordHash = await PasswordHasher.HashPasswordAsync(password);
+        user.SecurityVersion = AuthorityManager.GenerateVersion();
 
         var updateResult = await UserRepository.UpdateUserAsync(user);
-        return updateResult == null ? AuthorityResult<TUser>.Error("Failed to save updates!") : AuthorityResult<TUser>.Ok(updateResult);
+        return updateResult == null ? AuthorityResult<AuthorityUser>.Error("Failed to save updates!") : AuthorityResult<AuthorityUser>.Ok(updateResult);
     }
 
-    public async Task<AuthorityResult<TUser>> CreateUserAsync(TUser userModel, string password)
+    public async Task<AuthorityResult<AuthorityUser>> CreateUserAsync(AuthorityUser userModel, string password)
     {
-        if (userModel is not AuthorityUserBase userBase)
-        {
-            return AuthorityResult<TUser>.Error($"Given user is not of base type {nameof(AuthorityUserBase)}!");
-        }
-
         var userValidation = await ValidateUserAsync(userModel);
         var passwordValidation = await ValidatePasswordAsync(userModel, password);
         if (!userValidation.Success || !passwordValidation.Success)
@@ -106,28 +96,28 @@ public class AuthorityUserManager<TUser> where TUser : class
             List<ValidationError> errors = [];
             errors.AddRange(userValidation.Errors);
             errors.AddRange(passwordValidation.Errors);
-            return AuthorityResult<TUser>.Failed(errors, ResultFailReason.Validation);
+            return AuthorityResult<AuthorityUser>.Failed(errors, ResultFailReason.Validation);
         }
         
-        userBase.Version = AuthorityManager.GenerateVersion();
-        userBase.SecurityVersion = AuthorityManager.GenerateVersion();
+        userModel.Version = AuthorityManager.GenerateVersion();
+        userModel.SecurityVersion = AuthorityManager.GenerateVersion();
         var hashedPassword = await PasswordHasher.HashPasswordAsync(password);
-        userBase.PasswordHash = hashedPassword;
+        userModel.PasswordHash = hashedPassword;
 
         var userCreationResult = await UserRepository.CreateUserAsync(userModel);
 
         return userCreationResult != null
-            ? AuthorityResult<TUser>.Ok(userCreationResult)
-            : AuthorityResult<TUser>.Error("Failed to create user in repository!");
+            ? AuthorityResult<AuthorityUser>.Ok(userCreationResult)
+            : AuthorityResult<AuthorityUser>.Error("Failed to create user in repository!");
     }
 
-    public async Task<Result<TUser>> UpdateUserAsync(TUser model)
+    public async Task<Result<AuthorityUser>> UpdateUserAsync(AuthorityUser model)
     {
         var updateResult = await UserRepository.UpdateUserAsync(model);
-        return updateResult != null ? Result<TUser>.Ok(updateResult) : Result<TUser>.Failed("Failed to update user in repository!");
+        return updateResult != null ? Result<AuthorityUser>.Ok(updateResult) : Result<AuthorityUser>.Failed("Failed to update user in repository!");
     }
 
-    public async Task<bool> DeleteUserAsync(TUser model)
+    public async Task<bool> DeleteUserAsync(AuthorityUser model)
     {
         var deleteResult = await UserRepository.DeleteUserAsync(model);
         return deleteResult;

@@ -2,7 +2,7 @@ using DotBased.AspNet.Authority.Attributes;
 
 namespace DotBased.AspNet.Authority.Models.Authority;
 
-public class AuthorityUser : AuthorityUser<Guid>
+public class AuthorityUser
 {
     public AuthorityUser(string userName) : this()
     {
@@ -14,15 +14,9 @@ public class AuthorityUser : AuthorityUser<Guid>
         Id = Guid.NewGuid();
         CreatedDate = DateTime.Now;
     }
-}
-
-public abstract class AuthorityUser<TKey> : AuthorityUserBase where TKey : IEquatable<TKey>
-{
-    public TKey Id { get; set; }
-}
-
-public abstract class AuthorityUserBase
-{
+    
+    public Guid Id { get; set; }
+    
     public bool Enabled { get; set; }
     
     public bool Confirmed { get; set; }

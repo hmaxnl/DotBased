@@ -4,20 +4,15 @@ using DotBased.AspNet.Authority.Models.Validation;
 
 namespace DotBased.AspNet.Authority.Validators;
 
-public class PasswordEqualsValidator<TUser> : IPasswordValidator<TUser> where TUser : class
+public class PasswordEqualsValidator : IPasswordValidator
 {
     private const string ValidatorId = "Authority.Validator.Password.Equals";
     private const string ValidationBase = "Authority.Validation.Password";
-    public async Task<ValidationResult> ValidatePasswordAsync(AuthorityUserManager<TUser> userManager, TUser user, string password)
+    public async Task<ValidationResult> ValidatePasswordAsync(AuthorityUserManager userManager, AuthorityUser user, string password)
     {
-        if (user is not AuthorityUserBase authorityUser)
-        {
-            throw new ArgumentException($"User is not type of {nameof(AuthorityUserBase)}!", nameof(user));
-        }
-
         List<ValidationError> errors = [];
         var hashedPassword = await userManager.PasswordHasher.HashPasswordAsync(password);
-        if (authorityUser.PasswordHash != null && authorityUser.PasswordHash.Equals(hashedPassword, StringComparison.Ordinal))
+        if (user.PasswordHash != null && user.PasswordHash.Equals(hashedPassword, StringComparison.Ordinal))
         {
             errors.Add(new ValidationError(ValidatorId, $"{ValidationBase}.InUse", "User uses this password already!"));
         }

@@ -5,34 +5,27 @@ using DotBased.AspNet.Authority.Models.Validation;
 
 namespace DotBased.AspNet.Authority.Validators;
 
-public class UserValidator<TUser> : IUserValidator<TUser> where TUser : class
+public class UserValidator : IUserValidator
 {
     private const string ValidatorId = "Authority.Validator.User";
     private const string ValidationBase = "Authority.Validation.User";
 
-    public async Task<ValidationResult> ValidateUserAsync(AuthorityUserManager<TUser> manager, TUser user)
+    public async Task<ValidationResult> ValidateUserAsync(AuthorityUserManager manager, AuthorityUser user)
     {
         List<ValidationError> errors = [];
 
         var userOptions = manager.AuthorityManager.Options.User;
 
-        if (user is not AuthorityUserBase userBase)
-        {
-            errors.Add(new ValidationError(ValidatorId, $"{ValidationBase}.NotAuthorityUser",
-                $"Given user model is not an type of {nameof(AuthorityUserBase)}"));
-            return ValidationResult.Failed(errors);
-        }
-
         if (userOptions.RequireUniqueEmail)
         {
-            if (string.IsNullOrWhiteSpace(userBase.EmailAddress))
+            if (string.IsNullOrWhiteSpace(user.EmailAddress))
             {
                 errors.Add(new ValidationError(ValidatorId, $"{ValidationBase}.NoEmail",
                     $"Option {nameof(UserOptions.RequireUniqueEmail)} is set to true but given user does not have an email address!"));
             }
             else
             {
-                var userEmailResult = await manager.UserRepository.GetUserByEmailAsync(userBase.EmailAddress);
+                var userEmailResult = await manager.UserRepository.GetAuthorityUserByEmailAsync(user.EmailAddress);
                 if (userEmailResult != null)
                 {
                     errors.Add(new ValidationError(ValidatorId, $"{ValidationBase}.EmailExists",
@@ -41,9 +34,9 @@ public class UserValidator<TUser> : IUserValidator<TUser> where TUser : class
             }
         }
 
-        if (!string.IsNullOrWhiteSpace(userBase.UserName))
+        if (!string.IsNullOrWhiteSpace(user.UserName))
         {
-            if (userOptions.UserNameBlackList.Count != 0 && userOptions.UserNameBlackList.Contains(userBase.UserName, userOptions.UserNameBlackListComparer))
+            if (userOptions.UserNameBlackList.Count != 0 && userOptions.UserNameBlackList.Contains(user.UserName, userOptions.UserNameBlackListComparer))
             {
                 errors.Add(new ValidationError(ValidatorId, $"{ValidationBase}.Blacklisted", "Given username is not allowed (blacklisted)"));
             }
@@ -53,11 +46,11 @@ public class UserValidator<TUser> : IUserValidator<TUser> where TUser : class
                 List<char> chars = [];
                 if (userOptions.UserNameCharacterListType == ListOption.Whitelist)
                 {
-                    chars.AddRange(userBase.UserName.Where(userNameChar => !userOptions.UserNameCharacters.Contains(userNameChar)));
+                    chars.AddRange(user.UserName.Where(userNameChar => !userOptions.UserNameCharacters.Contains(userNameChar)));
                 }
                 if (userOptions.UserNameCharacterListType == ListOption.Blacklist)
                 {
-                    chars.AddRange(userBase.UserName.Where(userNameChar => userOptions.UserNameCharacters.Contains(userNameChar)));
+                    chars.AddRange(user.UserName.Where(userNameChar => userOptions.UserNameCharacters.Contains(userNameChar)));
                 }
 
                 if (chars.Count <= 0) return errors.Count > 0 ? ValidationResult.Failed(errors) : ValidationResult.Ok();

@@ -26,9 +26,6 @@ public static class AuthorityProviderExtensions
         services.TryAddScoped<IPhoneNumberVerifier, PhoneNumberVerifier>();
         services.TryAddScoped<IUserVerifier, UserVerifier>();*/
         services.TryAddScoped<AuthorityManager>();
-        services.TryAddScoped<AuthorityUserManager>();
-        services.TryAddScoped<AuthorityGroupManager>();
-        services.TryAddScoped<AuthorityRoleManager>();
         return new AuthorityBuilder(services);
     }
 

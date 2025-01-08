@@ -6,5 +6,5 @@ namespace DotBased.AspNet.Authority.Validators;
 
 public interface IPasswordValidator
 {
-    public Task<ValidationResult> ValidatePasswordAsync(AuthorityUserManager userManager, AuthorityUser user, string password);
+    public Task<ValidationResult> ValidatePasswordAsync(AuthorityManager manager, AuthorityUser user, string password);
 }

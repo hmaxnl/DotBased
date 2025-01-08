@@ -2,22 +2,28 @@ using System.Reflection;
 using DotBased.AspNet.Authority.Attributes;
 using DotBased.AspNet.Authority.Crypto;
 using DotBased.AspNet.Authority.Models.Options;
+using DotBased.AspNet.Authority.Repositories;
+using DotBased.AspNet.Authority.Validators;
 using DotBased.Logging;
 using Microsoft.Extensions.Options;
 
 namespace DotBased.AspNet.Authority.Managers;
 
-public class AuthorityManager
+public partial class AuthorityManager
 {
     public AuthorityManager(
         IOptions<AuthorityOptions> options,
         IServiceProvider services,
-        ICryptographer cryptographer)
+        ICryptographer cryptographer,
+        IUserRepository userRepository,
+        IPasswordHasher passwordHasher)
     {
         _logger = LogService.RegisterLogger<AuthorityManager>();
-        Options = options.Value ?? new AuthorityOptions();
+        Options = options.Value;
         Services = services;
         Cryptographer = cryptographer;
+        UserRepository = userRepository;
+        PasswordHasher = passwordHasher;
     }
 
     private readonly ILogger _logger;
@@ -25,6 +31,13 @@ public class AuthorityManager
     public IServiceProvider Services { get; }
     public AuthorityOptions Options { get; }
     public ICryptographer Cryptographer { get; }
+    
+    public IUserRepository UserRepository { get; }
+    
+    public IPasswordHasher PasswordHasher { get; }
+    
+    public IEnumerable<IPasswordValidator> PasswordValidators { get; } = [];
+    public IEnumerable<IUserValidator> UserValidators { get; } = [];
 
 
     public long GenerateVersion() => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
@@ -38,12 +51,7 @@ public class AuthorityManager
     /// <typeparam name="TModel">The class with the properties to protect.</typeparam>
     public async Task HandlePropertyProtection<TModel>(TModel data, bool protection)
     {
-        var props = GetProtectedPropertiesValues<TModel>(data);
-        if (Cryptographer == null)
-        {
-            _logger.Warning("No cryptographer specified! Cannot encrypt/decrypt properties.");
-            return;
-        }
+        var props = GetProtectedPropertiesValues(data);
         if (props.Count == 0)
         {
             return;

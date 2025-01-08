@@ -8,7 +8,7 @@ public class PasswordEqualsValidator : IPasswordValidator
 {
     private const string ValidatorId = "Authority.Validator.Password.Equals";
     private const string ValidationBase = "Authority.Validation.Password";
-    public async Task<ValidationResult> ValidatePasswordAsync(AuthorityUserManager userManager, AuthorityUser user, string password)
+    public async Task<ValidationResult> ValidatePasswordAsync(AuthorityManager userManager, AuthorityUser user, string password)
     {
         List<ValidationError> errors = [];
         var hashedPassword = await userManager.PasswordHasher.HashPasswordAsync(password);

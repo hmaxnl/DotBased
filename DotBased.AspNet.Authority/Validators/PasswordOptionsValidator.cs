@@ -8,19 +8,18 @@ namespace DotBased.AspNet.Authority.Validators;
 /// <summary>
 /// Validates the password against the options that is configured.
 /// </summary>
-/// <typeparam name="TUser">The user model used.</typeparam>
 public class PasswordOptionsValidator : IPasswordValidator
 {
     private const string ValidatorId = "Authority.Validator.Password.Options";
     private const string ValidationBase = "Authority.Validation.Password";
     
-    public async Task<ValidationResult> ValidatePasswordAsync(AuthorityUserManager userManager, AuthorityUser user, string password)
+    public async Task<ValidationResult> ValidatePasswordAsync(AuthorityManager userManager, AuthorityUser user, string password)
     {
         if (userManager == null)
         {
             throw new ArgumentNullException(nameof(userManager), "User manager is not provided!");
         }
-        var passwordOptions = userManager.AuthorityManager.Options.Password;
+        var passwordOptions = userManager.Options.Password;
         var errors = new List<ValidationError>();
         
         if (password.IsNullOrEmpty() || password.Length < passwordOptions.RequiredLength)

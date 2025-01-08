@@ -1,6 +1,6 @@
 namespace DotBased.AspNet.Authority.Managers;
 
-public class AuthorityGroupManager
+public partial class AuthorityManager
 {
     
 }

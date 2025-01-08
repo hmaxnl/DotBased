@@ -1,41 +1,11 @@
-using DotBased.AspNet.Authority.Crypto;
 using DotBased.AspNet.Authority.Models;
 using DotBased.AspNet.Authority.Models.Authority;
 using DotBased.AspNet.Authority.Models.Validation;
-using DotBased.AspNet.Authority.Repositories;
-using DotBased.AspNet.Authority.Validators;
-using DotBased.Logging;
 
 namespace DotBased.AspNet.Authority.Managers;
 
-public class AuthorityUserManager
+public partial class AuthorityManager
 {
-    public AuthorityUserManager(
-        AuthorityManager manager,
-        IUserRepository userRepository,
-        IPasswordHasher passwordHasher,
-        IEnumerable<IPasswordValidator>? passwordValidators,
-        IEnumerable<IUserValidator>? userValidators)
-    {
-        _logger = LogService.RegisterLogger<AuthorityUserManager>();
-        AuthorityManager = manager;
-        UserRepository = userRepository;
-        PasswordHasher = passwordHasher;
-        if (passwordValidators != null)
-            PasswordValidators = passwordValidators;
-        if (userValidators != null)
-            UserValidators = userValidators;
-    }
-
-    private readonly ILogger _logger;
-    public AuthorityManager AuthorityManager { get; }
-    public IUserRepository UserRepository { get; }
-    
-    public IPasswordHasher PasswordHasher { get; }
-    
-    public IEnumerable<IPasswordValidator> PasswordValidators { get; } = [];
-    public IEnumerable<IUserValidator> UserValidators { get; } = [];
-
     public async Task<ValidationResult> ValidatePasswordAsync(AuthorityUser user, string password)
     {
         List<ValidationError> errors = [];
@@ -81,7 +51,7 @@ public class AuthorityUserManager
         }
 
         user.PasswordHash = await PasswordHasher.HashPasswordAsync(password);
-        user.SecurityVersion = AuthorityManager.GenerateVersion();
+        user.SecurityVersion = GenerateVersion();
 
         var updateResult = await UserRepository.UpdateUserAsync(user);
         return updateResult == null ? AuthorityResult<AuthorityUser>.Error("Failed to save updates!") : AuthorityResult<AuthorityUser>.Ok(updateResult);
@@ -99,8 +69,8 @@ public class AuthorityUserManager
             return AuthorityResult<AuthorityUser>.Failed(errors, ResultFailReason.Validation);
         }
         
-        userModel.Version = AuthorityManager.GenerateVersion();
-        userModel.SecurityVersion = AuthorityManager.GenerateVersion();
+        userModel.Version = GenerateVersion();
+        userModel.SecurityVersion = GenerateVersion();
         var hashedPassword = await PasswordHasher.HashPasswordAsync(password);
         userModel.PasswordHash = hashedPassword;
 

@@ -10,11 +10,11 @@ public class UserValidator : IUserValidator
     private const string ValidatorId = "Authority.Validator.User";
     private const string ValidationBase = "Authority.Validation.User";
 
-    public async Task<ValidationResult> ValidateUserAsync(AuthorityUserManager manager, AuthorityUser user)
+    public async Task<ValidationResult> ValidateUserAsync(AuthorityManager manager, AuthorityUser user)
     {
         List<ValidationError> errors = [];
 
-        var userOptions = manager.AuthorityManager.Options.User;
+        var userOptions = manager.Options.User;
 
         if (userOptions.RequireUniqueEmail)
         {

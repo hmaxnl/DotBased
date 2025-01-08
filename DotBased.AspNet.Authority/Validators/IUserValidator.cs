@@ -6,5 +6,5 @@ namespace DotBased.AspNet.Authority.Validators;
 
 public interface IUserValidator
 {
-    public Task<ValidationResult> ValidateUserAsync(AuthorityUserManager manager, AuthorityUser user);
+    public Task<ValidationResult> ValidateUserAsync(AuthorityManager manager, AuthorityUser user);
 }

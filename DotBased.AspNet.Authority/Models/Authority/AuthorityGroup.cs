@@ -1,6 +1,6 @@
 namespace DotBased.AspNet.Authority.Models.Authority;
 
-public class AuthorityGroup : AuthorityGroup<Guid>
+public class AuthorityGroup
 {
     public AuthorityGroup(string name) : this()
     {
@@ -12,11 +12,8 @@ public class AuthorityGroup : AuthorityGroup<Guid>
         Id = Guid.NewGuid();
         CreatedDate = DateTime.Now;
     }
-}
-
-public abstract class AuthorityGroup<TKey> where TKey : IEquatable<TKey>
-{
-    public TKey Id { get; set; }
+    
+    public Guid Id { get; set; }
     
     public string? Name { get; set; }
 

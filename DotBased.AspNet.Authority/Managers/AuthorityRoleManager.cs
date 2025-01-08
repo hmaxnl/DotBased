@@ -19,8 +19,16 @@ public partial class AuthorityManager
         return Result<AuthorityRole>.Failed("Not implemented!");
     }
 
-    public async Task AddUserToRole(AuthorityUser user, AuthorityRole role, CancellationToken? cancellationToken = null)
+    public async Task AddRoleToUserAsync(AuthorityUser user, AuthorityRole role, CancellationToken? cancellationToken = null)
     {
         
+    }
+
+    public async Task RemoveRoleFromUserAsync(AuthorityRole role, AuthorityUser user, CancellationToken? cancellationToken = null)
+    {
+    }
+
+    public async Task AddRoleToGroupAsync(AuthorityRole role, AuthorityGroup group, CancellationToken? cancellationToken = null)
+    {
     }
 }

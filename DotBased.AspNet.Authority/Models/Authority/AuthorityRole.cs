@@ -1,22 +1,8 @@
 namespace DotBased.AspNet.Authority.Models.Authority;
 
-public class AuthorityRole : AuthorityRole<Guid>
+public abstract class AuthorityRole
 {
-    public AuthorityRole(string name) : this()
-    {
-        Name = name;
-    }
-    
-    public AuthorityRole()
-    {
-        Id = Guid.NewGuid();
-        CreatedDate = DateTime.Now;
-    }
-}
-
-public abstract class AuthorityRole<TKey> where TKey : IEquatable<TKey>
-{
-    public TKey Id { get; set; }
+    public Guid Id { get; set; }
     
     public string? Name { get; set; }
 

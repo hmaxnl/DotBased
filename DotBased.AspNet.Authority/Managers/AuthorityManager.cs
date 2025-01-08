@@ -16,6 +16,7 @@ public partial class AuthorityManager
         IServiceProvider services,
         ICryptographer cryptographer,
         IUserRepository userRepository,
+        IRoleRepository roleRepository,
         IPasswordHasher passwordHasher)
     {
         _logger = LogService.RegisterLogger<AuthorityManager>();
@@ -23,6 +24,7 @@ public partial class AuthorityManager
         Services = services;
         Cryptographer = cryptographer;
         UserRepository = userRepository;
+        RoleRepository = roleRepository;
         PasswordHasher = passwordHasher;
     }
 
@@ -33,6 +35,7 @@ public partial class AuthorityManager
     public ICryptographer Cryptographer { get; }
     
     public IUserRepository UserRepository { get; }
+    public IRoleRepository RoleRepository { get; }
     
     public IPasswordHasher PasswordHasher { get; }
     

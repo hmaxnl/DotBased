@@ -1,0 +1,1 @@
+An user can be in multiple [[AuthorityGroup]]s, can have own [[AuthorityRole]]s and [[AuthorityAttribute]]s.

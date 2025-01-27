@@ -2,21 +2,15 @@ using DotBased.AspNet.Authority.Attributes;
 
 namespace DotBased.AspNet.Authority.Models.Authority;
 
-public class AuthorityUser
+public class AuthorityUser()
 {
     public AuthorityUser(string userName) : this()
     {
         UserName = userName;
     }
-    
-    public AuthorityUser()
-    {
-        Id = Guid.NewGuid();
-        CreatedDate = DateTime.Now;
-    }
-    
-    public Guid Id { get; set; }
-    
+
+    public Guid Id { get; set; } = Guid.NewGuid();
+
     public bool Enabled { get; set; }
     
     public bool Confirmed { get; set; }
@@ -29,7 +23,7 @@ public class AuthorityUser
 
     public string? PasswordHash { get; set; }
     
-    public DateTime CreatedDate { get; set; }
+    public DateTime CreatedDate { get; set; } = DateTime.Now;
 
     public bool TwoFactorEnabled { get; set; }
 

@@ -9,36 +9,25 @@ using Microsoft.Extensions.Options;
 
 namespace DotBased.AspNet.Authority.Managers;
 
-public partial class AuthorityManager
+public partial class AuthorityManager(
+    IOptions<AuthorityOptions> options,
+    IServiceProvider services,
+    ICryptographer cryptographer,
+    IUserRepository userRepository,
+    IRoleRepository roleRepository,
+    IPasswordHasher passwordHasher)
 {
-    public AuthorityManager(
-        IOptions<AuthorityOptions> options,
-        IServiceProvider services,
-        ICryptographer cryptographer,
-        IUserRepository userRepository,
-        IRoleRepository roleRepository,
-        IPasswordHasher passwordHasher)
-    {
-        _logger = LogService.RegisterLogger<AuthorityManager>();
-        Options = options.Value;
-        Services = services;
-        Cryptographer = cryptographer;
-        UserRepository = userRepository;
-        RoleRepository = roleRepository;
-        PasswordHasher = passwordHasher;
-    }
+    private readonly ILogger _logger = LogService.RegisterLogger<AuthorityManager>();
 
-    private readonly ILogger _logger;
+    public IServiceProvider Services { get; } = services;
+    public AuthorityOptions Options { get; } = options.Value;
+    public ICryptographer Cryptographer { get; } = cryptographer;
 
-    public IServiceProvider Services { get; }
-    public AuthorityOptions Options { get; }
-    public ICryptographer Cryptographer { get; }
-    
-    public IUserRepository UserRepository { get; }
-    public IRoleRepository RoleRepository { get; }
-    
-    public IPasswordHasher PasswordHasher { get; }
-    
+    public IUserRepository UserRepository { get; } = userRepository;
+    public IRoleRepository RoleRepository { get; } = roleRepository;
+
+    public IPasswordHasher PasswordHasher { get; } = passwordHasher;
+
     public IEnumerable<IPasswordValidator> PasswordValidators { get; } = [];
     public IEnumerable<IUserValidator> UserValidators { get; } = [];
 

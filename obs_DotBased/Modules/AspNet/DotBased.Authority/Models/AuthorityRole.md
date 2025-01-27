@@ -1,0 +1,1 @@
+Roles used for permissions and specific [[AuthorityAttribute]]s. Can get added to [[AuthorityUser]] and [[AuthorityRole]]

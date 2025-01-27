@@ -1,0 +1,22 @@
+{
+	"nodes":[
+		{"id":"d06f84f5cb83d5b3","type":"file","file":"Modules/AspNet/DotBased.Authority/Models/AuthorityUser.md","x":-660,"y":-740,"width":400,"height":400},
+		{"id":"20469f32c2b97d54","type":"file","file":"Modules/AspNet/DotBased.Authority/Models/AuthorityGroup.md","x":-180,"y":-740,"width":400,"height":400},
+		{"id":"54394f02266f386b","x":-180,"y":-1480,"width":400,"height":400,"type":"file","file":"Modules/AspNet/DotBased.Authority/Models/AuthorityAttribute.md"},
+		{"id":"e38f59f13e522e10","x":-340,"y":-190,"width":250,"height":60,"color":"5","type":"text","text":"#### UsersGroups"},
+		{"id":"cfabf37254bf9b94","x":-340,"y":-40,"width":250,"height":60,"color":"5","type":"text","text":"#### UserRoles"},
+		{"id":"d306221d0fc3815f","x":300,"y":-740,"width":400,"height":400,"type":"file","file":"Modules/AspNet/DotBased.Authority/Models/AuthorityRole.md"},
+		{"id":"3c9bc17b3a311b43","x":140,"y":-190,"width":250,"height":60,"color":"5","type":"text","text":"#### GroupsRoles"}
+	],
+	"edges":[
+		{"id":"591458f8b454aec0","fromNode":"d06f84f5cb83d5b3","fromSide":"bottom","toNode":"e38f59f13e522e10","toSide":"left"},
+		{"id":"a5758a4bbb7fe559","fromNode":"20469f32c2b97d54","fromSide":"bottom","toNode":"e38f59f13e522e10","toSide":"right"},
+		{"id":"86bf0eb2ae0fcfdc","fromNode":"d06f84f5cb83d5b3","fromSide":"bottom","toNode":"cfabf37254bf9b94","toSide":"left"},
+		{"id":"64a58417d746183f","fromNode":"d306221d0fc3815f","fromSide":"bottom","toNode":"cfabf37254bf9b94","toSide":"right"},
+		{"id":"e5825aa1415a34c4","fromNode":"20469f32c2b97d54","fromSide":"bottom","toNode":"3c9bc17b3a311b43","toSide":"left"},
+		{"id":"0aa9af60a44a83dd","fromNode":"d306221d0fc3815f","fromSide":"bottom","toNode":"3c9bc17b3a311b43","toSide":"right"},
+		{"id":"1958b5d5b82c10d7","fromNode":"54394f02266f386b","fromSide":"bottom","toNode":"d06f84f5cb83d5b3","toSide":"top"},
+		{"id":"c71f1f3fc3e239f3","fromNode":"54394f02266f386b","fromSide":"bottom","toNode":"20469f32c2b97d54","toSide":"top"},
+		{"id":"bd026c0a356725a5","fromNode":"54394f02266f386b","fromSide":"bottom","toNode":"d306221d0fc3815f","toSide":"top"}
+	]
+}

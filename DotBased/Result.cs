@@ -47,7 +47,7 @@ public class Result<TValue> : Result
 
 public class ListResult<TItem> : Result
 {
-    public ListResult(bool success, string message, int totalCount, IEnumerable<TItem>? items, Exception? exception) : base(success, message, exception)
+    public ListResult(bool success, string message, int totalCount, IEnumerable<TItem>? items, int limit = -1, int offset = -1, Exception? exception = null) : base(success, message, exception)
     {
         Items = items != null ? new List<TItem>(items) : new List<TItem>();
         TotalCount = totalCount;
@@ -69,9 +69,19 @@ public class ListResult<TItem> : Result
     /// </summary>
     public int TotalCount { get; }
 
+    /// <summary>
+    /// The limit this result contains
+    /// </summary>
+    public int Limit { get; }
+    
+    /// <summary>
+    /// The offset this result has the items from.
+    /// </summary>
+    public int Offset { get; }
+
     public static ListResult<TItem> Ok(IEnumerable<TItem> items, int totalCount = -1) =>
-        new(true, string.Empty, totalCount, items, null);
+        new(true, string.Empty, totalCount, items);
 
     public new static ListResult<TItem> Failed(string message, Exception? exception = null) =>
-        new(false, message, -1, null, exception);
+        new(false, message, -1, null);
 }

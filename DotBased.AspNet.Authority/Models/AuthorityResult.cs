@@ -2,20 +2,23 @@ using DotBased.AspNet.Authority.Models.Validation;
 
 namespace DotBased.AspNet.Authority.Models;
 
-public class AuthorityResult<TResultValue>
+public class AuthorityResult<TResultValue> : Result<TResultValue>
 {
-    public AuthorityResult(bool success, string errorMessage = "", TResultValue? value = default, ResultFailReason reason = ResultFailReason.None, List<ValidationError>? errors = null)
+    public static AuthorityResult<TResultValue> FromResult(Result<TResultValue> result) => new AuthorityResult<TResultValue>(result);
+    
+    public AuthorityResult(Result<TResultValue> result) : base(result)
+    {
+        Reason = ResultFailReason.Unknown;
+    }
+    
+    public AuthorityResult(bool success, string errorMessage = "", TResultValue? value = default, ResultFailReason reason = ResultFailReason.None, List<ValidationError>? errors = null) : base(success, errorMessage, value, null)
     {
         Success = success;
-        ErrorMessage = errorMessage;
+        Message = errorMessage;
         Value = value;
         Reason = reason;
         ValidationErrors = errors;
     }
-    
-    public bool Success { get; }
-    public string ErrorMessage { get; }
-    public TResultValue? Value { get; }
     public ResultFailReason Reason { get; }
     public List<ValidationError>? ValidationErrors { get; }
     

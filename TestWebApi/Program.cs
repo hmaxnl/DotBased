@@ -1,7 +1,9 @@
 using DotBased.AspNet.Authority;
+using DotBased.AspNet.Authority.EFCore;
 using DotBased.Logging;
 using DotBased.Logging.MEL;
 using DotBased.Logging.Serilog;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 using TestWebApi;
 using ILogger = Serilog.ILogger;
@@ -19,7 +21,10 @@ LogService.AddLogAdapter(new BasedSerilogAdapter(serilogLogger));
 
 builder.Logging.ClearProviders();
 builder.Logging.AddDotBasedLoggerProvider(LogService.Options);
-
+builder.Services.AddAuthorityContext(options =>
+{
+    options.UseSqlite("Data Source=dev-dotbased.db");
+});
 builder.Services.AddAuthority(options =>
 {
     

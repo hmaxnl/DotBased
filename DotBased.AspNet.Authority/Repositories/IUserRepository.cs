@@ -4,15 +4,14 @@ namespace DotBased.AspNet.Authority.Repositories;
 
 public interface IUserRepository
 {
-    public Task<AuthorityUser?> GetAuthorityUserByIdAsync(string id, CancellationToken? cancellationToken = null);
-    public Task<string> GetAuthorityUserIdAsync(AuthorityUser user, CancellationToken? cancellationToken = null);
-    public Task<Tuple<List<AuthorityUser>?, int>> GetAuthorityUsersAsync(string query, int maxResults = 20, int offset = 0, CancellationToken? cancellationToken = null);
-    public Task<AuthorityUser?> GetAuthorityUserByEmailAsync(string email, CancellationToken? cancellationToken = null);
-    public Task SetVersionAsync(AuthorityUser user, long version, CancellationToken? cancellationToken = null);
-    public Task<long> GetVersionAsync(AuthorityUser user, CancellationToken? cancellationToken = null);
-    public Task SetSecurityVersionAsync(AuthorityUser user, long version, CancellationToken? cancellationToken = null);
-    public Task<long> GetSecurityVersionAsync(AuthorityUser user, CancellationToken? cancellationToken = null);
-    public Task<AuthorityUser?> CreateUserAsync(AuthorityUser user, CancellationToken? cancellationToken = null);
-    public Task<AuthorityUser?> UpdateUserAsync(AuthorityUser user, CancellationToken? cancellationToken = null);
-    public Task<bool> DeleteUserAsync(AuthorityUser user, CancellationToken? cancellationToken = null);
+    public Task<ListResult<AuthorityUserItem>> GetAuthorityUsersAsync(int limit = 20, int offset = 0, string search = "", CancellationToken? cancellationToken = null);
+    public Task<Result<AuthorityUser>> GetAuthorityUserByIdAsync(string id, CancellationToken? cancellationToken = null);
+    public Task<Result<AuthorityUser>> CreateUserAsync(AuthorityUser user, CancellationToken? cancellationToken = null);
+    public Task<Result<AuthorityUser>> UpdateUserAsync(AuthorityUser user, CancellationToken? cancellationToken = null);
+    public Task<Result> DeleteUserAsync(AuthorityUser user, CancellationToken? cancellationToken = null);
+    public Task<Result<AuthorityUser>> GetAuthorityUserByEmailAsync(string email, CancellationToken? cancellationToken = null);
+    public Task<Result> SetVersionAsync(AuthorityUser user, long version, CancellationToken? cancellationToken = null);
+    public Task<Result<long>> GetVersionAsync(AuthorityUser user, CancellationToken? cancellationToken = null);
+    public Task<Result> SetSecurityVersionAsync(AuthorityUser user, long version, CancellationToken? cancellationToken = null);
+    public Task<Result<long>> GetSecurityVersionAsync(AuthorityUser user, CancellationToken? cancellationToken = null);
 }

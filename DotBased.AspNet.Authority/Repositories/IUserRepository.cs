@@ -9,7 +9,7 @@ public interface IUserRepository
     public Task<Result<AuthorityUser>> CreateUserAsync(AuthorityUser user, CancellationToken? cancellationToken = null);
     public Task<Result<AuthorityUser>> UpdateUserAsync(AuthorityUser user, CancellationToken? cancellationToken = null);
     public Task<Result> DeleteUserAsync(AuthorityUser user, CancellationToken? cancellationToken = null);
-    public Task<Result<AuthorityUser>> GetAuthorityUserByEmailAsync(string email, CancellationToken? cancellationToken = null);
+    public Task<Result<AuthorityUser>> GetUserByEmailAsync(string email, CancellationToken? cancellationToken = null);
     public Task<Result> SetVersionAsync(AuthorityUser user, long version, CancellationToken? cancellationToken = null);
     public Task<Result<long>> GetVersionAsync(AuthorityUser user, CancellationToken? cancellationToken = null);
     public Task<Result> SetSecurityVersionAsync(AuthorityUser user, long version, CancellationToken? cancellationToken = null);

@@ -25,7 +25,7 @@ public class UserValidator : IUserValidator
             }
             else
             {
-                var userEmailResult = await manager.UserRepository.GetAuthorityUserByEmailAsync(user.EmailAddress);
+                var userEmailResult = await manager.UserRepository.GetUserByEmailAsync(user.EmailAddress);
                 if (userEmailResult != null)
                 {
                     errors.Add(new ValidationError(ValidatorId, $"{ValidationBase}.EmailExists",

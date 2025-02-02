@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DotBased.AspNet.Authority.EFCore;
 
-public class AuthorityContext : DbContext
+public class AuthorityContext(DbContextOptions<AuthorityContext> options) : DbContext(options)
 {
     public DbSet<AuthorityAttribute> Attributes { get; set; }
     public DbSet<AuthorityGroup> Groups { get; set; }
@@ -12,10 +12,32 @@ public class AuthorityContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<AuthorityAttribute>().ToTable("authority_attributes");
-        modelBuilder.Entity<AuthorityGroup>().ToTable("authority_groups");
-        modelBuilder.Entity<AuthorityRole>().ToTable("authority_roles");
-        modelBuilder.Entity<AuthorityUser>().ToTable("authority_users");
+        modelBuilder.Entity<AuthorityAttribute>(attributeEntity =>
+        {
+            attributeEntity.ToTable("authority_attributes");
+            attributeEntity.HasKey(a => new { a.BoundId, a.AttributeKey });
+        });
+
+        modelBuilder.Entity<AuthorityGroup>(groupEntity =>
+        {
+            groupEntity.ToTable("authority_groups");
+            groupEntity.HasKey(x => x.Id);
+            groupEntity.HasMany(g => g.Attributes).WithOne().HasForeignKey(a => a.BoundId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<AuthorityRole>(roleEntity =>
+        {
+            roleEntity.ToTable("authority_roles");
+            roleEntity.HasKey(x => x.Id);
+        });
+        
+        modelBuilder.Entity<AuthorityUser>(userEntity =>
+        {
+            userEntity.ToTable("authority_users");
+            userEntity.HasKey(x => x.Id);
+            userEntity.HasMany(u => u.Attributes).WithOne().HasForeignKey(a => a.BoundId).OnDelete(DeleteBehavior.Cascade);
+        });
+        
         base.OnModelCreating(modelBuilder);
     }
 }

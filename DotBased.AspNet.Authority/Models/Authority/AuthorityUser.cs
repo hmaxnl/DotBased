@@ -41,5 +41,7 @@ public class AuthorityUser()
 
     public bool PhoneNumberConfirmed { get; set; }
 
+    public ICollection<AuthorityAttribute> Attributes { get; set; } = [];
+
     public override string ToString() => UserName ?? EmailAddress ?? string.Empty;
 }

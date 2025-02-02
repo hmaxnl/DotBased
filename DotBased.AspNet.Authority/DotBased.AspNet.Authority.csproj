@@ -17,6 +17,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Models\Data\" />
       <Folder Include="Models\Security\" />
     </ItemGroup>
 

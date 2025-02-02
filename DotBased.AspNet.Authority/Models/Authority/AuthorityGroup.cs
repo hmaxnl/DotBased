@@ -20,4 +20,5 @@ public class AuthorityGroup
     public long Version { get; set; }
     
     public DateTime CreatedDate { get; set; }
+    public ICollection<AuthorityAttribute> Attributes { get; set; } = [];
 }

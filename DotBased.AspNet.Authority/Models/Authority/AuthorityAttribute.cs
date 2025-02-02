@@ -1,26 +1,18 @@
 namespace DotBased.AspNet.Authority.Models.Authority;
 
-public class AuthorityAttribute
+public class AuthorityAttribute(string attributeKey, Guid bound)
 {
-    public AuthorityAttribute(string attributeKey, string bound)
+    public AuthorityAttribute() : this(string.Empty, Guid.NewGuid())
     {
-        AttributeKey = attributeKey;
-        BoundId = bound;
     }
 
-    public AuthorityAttribute()
-    {
-        AttributeKey = string.Empty;
-        BoundId = string.Empty;
-    }
-
-    public string AttributeKey { get; set; } // ClaimType/Authority.attribute.enabled
+    public Guid BoundId { get; set; } = bound;
     
-    public string BoundId { get; set; } // Bound to User, Group, Role id
+    public string AttributeKey { get; set; } = attributeKey;
 
-    public object? AttributeValue { get; set; }
+    public string AttributeValue { get; set; } = string.Empty;
     
-    public string? Type { get; set; } // AspNet.Claim.Role/Property/Data.JSON, Data.Raw, Data.Base64 etc.
+    public string? Type { get; set; }
 
     public long Version { get; set; }
 }

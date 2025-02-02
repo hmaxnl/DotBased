@@ -1,6 +1,6 @@
 namespace DotBased.AspNet.Authority.Models.Authority;
 
-public abstract class AuthorityRole()
+public class AuthorityRole()
 {
     public AuthorityRole(string name) : this()
     {

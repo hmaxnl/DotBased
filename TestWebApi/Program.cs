@@ -23,7 +23,7 @@ builder.Logging.ClearProviders();
 builder.Logging.AddDotBasedLoggerProvider(LogService.Options);
 builder.Services.AddAuthorityContext(options =>
 {
-    options.UseSqlite("Data Source=dev-dotbased.db");
+    options.UseSqlite("Data Source=dev-dotbased.db", c => c.MigrationsAssembly("TestWebApi"));
 });
 builder.Services.AddAuthority(options =>
 {

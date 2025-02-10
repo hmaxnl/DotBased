@@ -43,6 +43,11 @@ public class Result<TValue> : Result
 
     public new static Result<TValue> Failed(string message, Exception? exception = null) =>
         new(false, message, default, exception);
+
+    public new static Result<TValue> HandleResult(TValue? value, string failedMessage, Exception? exception = null)
+    {
+        return value == null ? Failed(failedMessage, exception) : Ok(value);
+    }
 }
 
 public class ListResult<TItem> : Result

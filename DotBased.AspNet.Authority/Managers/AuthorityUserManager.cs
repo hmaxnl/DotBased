@@ -34,13 +34,13 @@ public partial class AuthorityManager
         return errors.Count > 0 ? ValidationResult.Failed(errors) : ValidationResult.Ok();
     }
 
-    public async Task<ListResult<AuthorityUserItem>> SearchUsersAsync(string query, int maxResults = 20, int offset = 0, CancellationToken? cancellationToken = null)
+    public async Task<ListResult<AuthorityUserItem>> SearchUsersAsync(string query, int maxResults = 20, int offset = 0, CancellationToken cancellationToken = default)
     {
         var result = await UserRepository.GetAuthorityUsersAsync(maxResults, offset, query, cancellationToken);
         return result;
     }
 
-    public async Task<AuthorityResult<AuthorityUser>> UpdatePasswordAsync(AuthorityUser user, string password, CancellationToken? cancellationToken = null)
+    public async Task<AuthorityResult<AuthorityUser>> UpdatePasswordAsync(AuthorityUser user, string password, CancellationToken cancellationToken = default)
     {
         var passwordValidation = await ValidatePasswordAsync(user, password);
         if (!passwordValidation.Success)
@@ -57,7 +57,7 @@ public partial class AuthorityManager
         return AuthorityResult<AuthorityUser>.FromResult(updateResult);
     }
 
-    public async Task<AuthorityResult<AuthorityUser>> CreateUserAsync(AuthorityUser userModel, string password, CancellationToken? cancellationToken = null)
+    public async Task<AuthorityResult<AuthorityUser>> CreateUserAsync(AuthorityUser userModel, string password, CancellationToken cancellationToken = default)
     {
         var userValidation = await ValidateUserAsync(userModel);
         var passwordValidation = await ValidatePasswordAsync(userModel, password);
@@ -79,13 +79,13 @@ public partial class AuthorityManager
         return AuthorityResult<AuthorityUser>.FromResult(userCreationResult);
     }
 
-    public async Task<Result<AuthorityUser>> UpdateUserAsync(AuthorityUser model, CancellationToken? cancellationToken = null)
+    public async Task<Result<AuthorityUser>> UpdateUserAsync(AuthorityUser model, CancellationToken cancellationToken = default)
     {
         var updateResult = await UserRepository.UpdateUserAsync(model, cancellationToken);
         return updateResult;
     }
 
-    public async Task<Result> DeleteUserAsync(AuthorityUser model, CancellationToken? cancellationToken = null)
+    public async Task<Result> DeleteUserAsync(AuthorityUser model, CancellationToken cancellationToken = default)
     {
         var deleteResult = await UserRepository.DeleteUserAsync(model, cancellationToken);
         return deleteResult;

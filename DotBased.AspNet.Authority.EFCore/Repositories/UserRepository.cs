@@ -78,7 +78,7 @@ public class UserRepository(IDbContextFactory<AuthorityContext> contextFactory) 
         try
         {
             await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
-            var usr = context.Users.FirstOrDefault(u => u.Id == user.Id);
+            var usr = await context.Users.FirstOrDefaultAsync(u => u.Id == user.Id, cancellationToken: cancellationToken);
             if (usr == null)
             {
                 return Result<AuthorityUser>.Failed("User not found!");
@@ -104,7 +104,7 @@ public class UserRepository(IDbContextFactory<AuthorityContext> contextFactory) 
         try
         {
             await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
-            var usr = context.Users.FirstOrDefault(u => u.Id == user.Id);
+            var usr = await context.Users.FirstOrDefaultAsync(u => u.Id == user.Id, cancellationToken: cancellationToken);
             if (usr == null)
             {
                 return Result.Failed("User not found!");
@@ -119,28 +119,99 @@ public class UserRepository(IDbContextFactory<AuthorityContext> contextFactory) 
         }
     }
 
-    public Task<Result<AuthorityUser>> GetUserByEmailAsync(string email, CancellationToken cancellationToken = default)
+    public async Task<Result<AuthorityUser>> GetUserByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        try
+        {
+            await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+            var usr = await context.Users.FirstOrDefaultAsync(u => u.EmailAddress == email, cancellationToken: cancellationToken);
+            return Result<AuthorityUser>.HandleResult(usr, "User not found by given email address.");
+        }
+        catch (Exception e)
+        {
+            return Result<AuthorityUser>.Failed("An error occured while getting the user.", e);
+        }
     }
 
-    public Task<Result> SetVersionAsync(AuthorityUser user, long version, CancellationToken cancellationToken = default)
+    public async Task<Result> SetVersionAsync(AuthorityUser user, long version, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        try
+        {
+            await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+            var usr = await context.Users.FirstOrDefaultAsync(u => u.Id == user.Id, cancellationToken);
+            if (usr == null)
+            {
+                return Result.Failed("Failed to find user with given id!");
+            }
+
+            if (usr.Version != user.Version)
+            {
+                return Result.Failed("Stored user version doesn't match current user version!");
+            }
+            
+            usr.Version = version;
+            context.Users.Update(usr);
+            var saveResult = await context.SaveChangesAsync(cancellationToken);
+            return saveResult <= 0 ? Result.Failed("Failed to update user!") : Result.Ok();
+        }
+        catch (Exception e)
+        {
+            return Result.Failed("An error occured while updating the version.", e);
+        }
     }
 
-    public Task<Result<long>> GetVersionAsync(AuthorityUser user, CancellationToken cancellationToken = default)
+    public async Task<Result<long>> GetVersionAsync(AuthorityUser user, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        try
+        {
+            await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+            var usrVersion = await context.Users.Where(u => u.Id == user.Id).Select(u => u.Version).FirstOrDefaultAsync(cancellationToken);
+            return Result<long>.HandleResult(usrVersion, "Failed to get user version!");
+        }
+        catch (Exception e)
+        {
+            return Result<long>.Failed("An error occured while getting the user version.", e);
+        }
     }
 
-    public Task<Result> SetSecurityVersionAsync(AuthorityUser user, long version, CancellationToken cancellationToken = default)
+    public async Task<Result> SetSecurityVersionAsync(AuthorityUser user, long securityVersion, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        try
+        {
+            await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+            var usr = await context.Users.FirstOrDefaultAsync(u => u.Id == user.Id, cancellationToken);
+            if (usr == null)
+            {
+                return Result.Failed("Failed to find user with given id!");
+            }
+
+            if (usr.SecurityVersion != user.SecurityVersion)
+            {
+                return Result.Failed("Stored user version doesn't match current user version!");
+            }
+            
+            usr.SecurityVersion = securityVersion;
+            context.Users.Update(usr);
+            var saveResult = await context.SaveChangesAsync(cancellationToken);
+            return saveResult <= 0 ? Result.Failed("Failed to update user!") : Result.Ok();
+        }
+        catch (Exception e)
+        {
+            return Result.Failed("An error occured while updating the security version.", e);
+        }
     }
 
-    public Task<Result<long>> GetSecurityVersionAsync(AuthorityUser user, CancellationToken cancellationToken = default)
+    public async Task<Result<long>> GetSecurityVersionAsync(AuthorityUser user, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        try
+        {
+            await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+            var usrVersion = await context.Users.Where(u => u.Id == user.Id).Select(u => u.SecurityVersion).FirstOrDefaultAsync(cancellationToken);
+            return Result<long>.HandleResult(usrVersion, "Failed to get user security version!");
+        }
+        catch (Exception e)
+        {
+            return Result<long>.Failed("An error occured while getting the user security version.", e);
+        }
     }
 }

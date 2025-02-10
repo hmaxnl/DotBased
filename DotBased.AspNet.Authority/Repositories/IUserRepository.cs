@@ -12,6 +12,6 @@ public interface IUserRepository
     public Task<Result<AuthorityUser>> GetUserByEmailAsync(string email, CancellationToken cancellationToken = default);
     public Task<Result> SetVersionAsync(AuthorityUser user, long version, CancellationToken cancellationToken = default);
     public Task<Result<long>> GetVersionAsync(AuthorityUser user, CancellationToken cancellationToken = default);
-    public Task<Result> SetSecurityVersionAsync(AuthorityUser user, long version, CancellationToken cancellationToken = default);
+    public Task<Result> SetSecurityVersionAsync(AuthorityUser user, long securityVersion, CancellationToken cancellationToken = default);
     public Task<Result<long>> GetSecurityVersionAsync(AuthorityUser user, CancellationToken cancellationToken = default);
 }

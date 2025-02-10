@@ -15,5 +15,7 @@ public class AuthorityRole()
 
     public DateTime CreatedDate { get; set; } = DateTime.Now;
 
+    public IEnumerable<AuthorityAttribute> Attributes { get; set; } = [];
+
     public override string ToString() => Name ?? string.Empty;
 }

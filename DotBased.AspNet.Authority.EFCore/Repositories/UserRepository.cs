@@ -1,14 +1,28 @@
 using DotBased.AspNet.Authority.Models.Authority;
 using DotBased.AspNet.Authority.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace DotBased.AspNet.Authority.EFCore.Repositories;
 
-public class UserRepository : IUserRepository
+public class UserRepository(IDbContextFactory<AuthorityContext> contextFactory) : IUserRepository
 {
-    public Task<ListResult<AuthorityUserItem>> GetAuthorityUsersAsync(int limit = 20, int offset = 0, string search = "",
-        CancellationToken? cancellationToken = null)
+    public async Task<ListResult<AuthorityUserItem>> GetAuthorityUsersAsync(int limit = 20, int offset = 0, string search = "", CancellationToken? cancellationToken = null)
     {
-        throw new NotImplementedException();
+        await using var context = await contextFactory.CreateDbContextAsync();
+        var query = context.Users.AsQueryable();
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            query = query.Where(u => $"{u.Id} {u.Name} {u.UserName} {u.EmailAddress} {u.PhoneNumber}".Contains(search, StringComparison.CurrentCultureIgnoreCase));
+        }
+        var totalCount = query.Count();
+        var selected = query.Skip(offset).Take(limit).Select(u => new AuthorityUserItem()
+        {
+            Id = u.Id,
+            UserName = u.UserName,
+            EmailAddress = u.EmailAddress,
+            PhoneNumber = u.PhoneNumber
+        });
+        return ListResult<AuthorityUserItem>.Ok(selected, totalCount, limit, offset);
     }
 
     public Task<Result<AuthorityUser>> GetAuthorityUserByIdAsync(string id, CancellationToken? cancellationToken = null)

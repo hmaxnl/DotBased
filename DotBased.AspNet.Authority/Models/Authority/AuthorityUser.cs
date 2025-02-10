@@ -1,3 +1,4 @@
+using System.Text;
 using DotBased.AspNet.Authority.Attributes;
 
 namespace DotBased.AspNet.Authority.Models.Authority;
@@ -19,7 +20,9 @@ public class AuthorityUser()
 
     public DateTime LockedDate { get; set; }
 
-    public string? UserName { get; set; }
+    public string UserName { get; set; } = string.Empty;
+
+    public string Name { get; set; } = string.Empty;
 
     public string? PasswordHash { get; set; }
     
@@ -43,5 +46,15 @@ public class AuthorityUser()
 
     public ICollection<AuthorityAttribute> Attributes { get; set; } = [];
 
-    public override string ToString() => UserName ?? EmailAddress ?? string.Empty;
+    public override string ToString()
+    {
+        var strBuilder = new StringBuilder();
+        strBuilder.Append(!string.IsNullOrWhiteSpace(Name) ? Name : UserName);
+
+        if (string.IsNullOrWhiteSpace(EmailAddress)) return strBuilder.ToString();
+        
+        strBuilder.Append(strBuilder.Length == 0 ? EmailAddress : $" ({EmailAddress})");
+
+        return strBuilder.ToString();
+    }
 }

@@ -79,7 +79,7 @@ public class ListResult<TItem> : Result
     /// </summary>
     public int Offset { get; }
 
-    public static ListResult<TItem> Ok(IEnumerable<TItem> items, int totalCount = -1) =>
+    public static ListResult<TItem> Ok(IEnumerable<TItem> items, int totalCount = -1, int limit = -1, int offset = -1) =>
         new(true, string.Empty, totalCount, items);
 
     public new static ListResult<TItem> Failed(string message, Exception? exception = null) =>

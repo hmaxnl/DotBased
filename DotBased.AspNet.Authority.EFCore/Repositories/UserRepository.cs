@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DotBased.AspNet.Authority.EFCore.Repositories;
 
-public class UserRepository(IDbContextFactory<AuthorityContext> contextFactory) : IUserRepository
+public class UserRepository(IDbContextFactory<AuthorityContext> contextFactory) : RepositoryBase, IUserRepository
 {
     public async Task<ListResult<AuthorityUserItem>> GetAuthorityUsersAsync(int limit = 20, int offset = 0, string search = "", CancellationToken cancellationToken = default)
     {
@@ -18,20 +18,19 @@ public class UserRepository(IDbContextFactory<AuthorityContext> contextFactory) 
                     $"{u.Id} {u.Name} {u.UserName} {u.EmailAddress} {u.PhoneNumber}".Contains(search,
                         StringComparison.CurrentCultureIgnoreCase));
             }
-
             var totalCount = query.Count();
-            var selected = query.Skip(offset).Take(limit).Select(u => new AuthorityUserItem()
+            var selected = await query.OrderBy(u => u.UserName).Skip(offset).Take(limit).Select(u => new AuthorityUserItem()
             {
                 Id = u.Id,
                 UserName = u.UserName,
                 EmailAddress = u.EmailAddress,
                 PhoneNumber = u.PhoneNumber
-            });
+            }).ToListAsync(cancellationToken: cancellationToken);
             return ListResult<AuthorityUserItem>.Ok(selected, totalCount, limit, offset);
         }
         catch (Exception e)
         {
-            return ListResult<AuthorityUserItem>.Failed("Failed to get users.", e);
+            return HandleExceptionListResult<AuthorityUserItem>("Failed to get users.", e);
         }
     }
 
@@ -45,12 +44,12 @@ public class UserRepository(IDbContextFactory<AuthorityContext> contextFactory) 
                 return Result<AuthorityUser>.Failed("Invalid id!");
             }
 
-            var user = await context.Users.FirstOrDefaultAsync(u => u.Id == guid, cancellationToken: cancellationToken);
+            var user = await context.Users.Where(u => u.Id == guid).Include(u => u.Attributes).FirstOrDefaultAsync(cancellationToken: cancellationToken);
             return Result<AuthorityUser>.HandleResult(user, "User not found.");
         }
         catch (Exception e)
         {
-            return Result<AuthorityUser>.Failed("Failed to get user.", e);
+            return HandleExceptionResult<AuthorityUser>("Failed to get user.", e);
         }
     }
 
@@ -69,7 +68,7 @@ public class UserRepository(IDbContextFactory<AuthorityContext> contextFactory) 
         }
         catch (Exception e)
         {
-            return Result<AuthorityUser>.Failed("Failed to create user.", e);
+            return HandleExceptionResult<AuthorityUser>("Failed to create user.", e);
         }
     }
 
@@ -95,7 +94,7 @@ public class UserRepository(IDbContextFactory<AuthorityContext> contextFactory) 
         }
         catch (Exception e)
         {
-            return Result<AuthorityUser>.Failed("Failed to update user!", e);
+            return HandleExceptionResult<AuthorityUser>("Failed to update user!", e);
         }
     }
 
@@ -115,7 +114,7 @@ public class UserRepository(IDbContextFactory<AuthorityContext> contextFactory) 
         }
         catch (Exception e)
         {
-            return Result.Failed("Failed to delete user!", e);
+            return HandleException("Failed to delete user!", e);
         }
     }
 
@@ -124,12 +123,12 @@ public class UserRepository(IDbContextFactory<AuthorityContext> contextFactory) 
         try
         {
             await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
-            var usr = await context.Users.FirstOrDefaultAsync(u => u.EmailAddress == email, cancellationToken: cancellationToken);
+            var usr = await context.Users.Where(u => u.EmailAddress == email).Include(u => u.Attributes).FirstOrDefaultAsync(cancellationToken: cancellationToken);
             return Result<AuthorityUser>.HandleResult(usr, "User not found by given email address.");
         }
         catch (Exception e)
         {
-            return Result<AuthorityUser>.Failed("An error occured while getting the user.", e);
+            return HandleExceptionResult<AuthorityUser>("An error occured while getting the user.", e);
         }
     }
 
@@ -156,7 +155,7 @@ public class UserRepository(IDbContextFactory<AuthorityContext> contextFactory) 
         }
         catch (Exception e)
         {
-            return Result.Failed("An error occured while updating the version.", e);
+            return HandleException("An error occured while updating the version.", e);
         }
     }
 
@@ -170,7 +169,7 @@ public class UserRepository(IDbContextFactory<AuthorityContext> contextFactory) 
         }
         catch (Exception e)
         {
-            return Result<long>.Failed("An error occured while getting the user version.", e);
+            return HandleExceptionResult<long>("An error occured while getting the user version.", e);
         }
     }
 
@@ -197,7 +196,7 @@ public class UserRepository(IDbContextFactory<AuthorityContext> contextFactory) 
         }
         catch (Exception e)
         {
-            return Result.Failed("An error occured while updating the security version.", e);
+            return HandleException("An error occured while updating the security version.", e);
         }
     }
 
@@ -211,7 +210,7 @@ public class UserRepository(IDbContextFactory<AuthorityContext> contextFactory) 
         }
         catch (Exception e)
         {
-            return Result<long>.Failed("An error occured while getting the user security version.", e);
+            return HandleExceptionResult<long>("An error occured while getting the user security version.", e);
         }
     }
 }

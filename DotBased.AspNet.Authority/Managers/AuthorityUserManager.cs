@@ -88,6 +88,10 @@ public partial class AuthorityManager
         var deleteResult = await UserRepository.DeleteUserAsync(model, cancellationToken);
         return deleteResult;
     }
-    
-    
+
+    public async Task<Result> IsValidUserAsync(AuthorityUser user, CancellationToken cancellationToken = default)
+    {
+        var usrResult = await userRepository.GetVersionAsync(user, cancellationToken);
+        return usrResult;
+    }
 }

@@ -1,10 +1,11 @@
+using DotBased.AspNet.Authority.Models.Authority;
+
 namespace DotBased.AspNet.Authority.Managers;
 
 public partial class AuthorityManager
 {
-    /*
-     * - Validate User & Group
-     * - Check if user is already in group (if already in group return)
-     * - Add to UsersGroups table
-     */
+    public async Task<ListResult<AuthorityGroupItem>> GetUserGroupsAsync(AuthorityUser user, CancellationToken cancellationToken = default)
+    {
+        return ListResult<AuthorityGroupItem>.Failed("Not implemented!");
+    }
 }

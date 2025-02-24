@@ -1,34 +1,36 @@
+using DotBased.AspNet.Authority.Models;
 using DotBased.AspNet.Authority.Models.Authority;
 
 namespace DotBased.AspNet.Authority.Managers;
 
 public partial class AuthorityManager
 {
-    public async Task<Result<AuthorityRole>> CreateRoleAsync(AuthorityRole role, CancellationToken? cancellationToken = null)
+    public async Task<AuthorityResult<AuthorityRole>> CreateRoleAsync(AuthorityRole role, CancellationToken cancellationToken = default)
     {
-        return Result<AuthorityRole>.Failed("Not implemented!");
+        role.Version = GenerateVersion();
+        var createResult = await roleRepository.CreateRoleAsync(role, cancellationToken);
+        return AuthorityResult<AuthorityRole>.FromResult(createResult);
     }
 
-    public async Task<Result> DeleteRoleAsync(AuthorityRole role, CancellationToken? cancellationToken = null)
+    public async Task<Result> DeleteRoleAsync(AuthorityRole role, CancellationToken cancellationToken = default)
     {
-        return Result.Failed("Not implemented!");
+        var result = await roleRepository.DeleteRoleAsync(role, cancellationToken);
+        return result;
     }
 
-    public async Task<Result<AuthorityRole>> UpdateRoleAsync(AuthorityRole role, CancellationToken? cancellationToken = null)
+    public async Task<Result<AuthorityRole>> UpdateRoleAsync(AuthorityRole role, CancellationToken cancellationToken = default)
     {
-        return Result<AuthorityRole>.Failed("Not implemented!");
+        var result = await roleRepository.UpdateRoleAsync(role, cancellationToken);
+        return result;
     }
 
-    public async Task<ListResult<AuthorityRole>> GetRolesAsync(int limit = 20, int offset = 0, string search = "", CancellationToken? cancellationToken = null)
+    public async Task<ListResult<AuthorityRoleItem>> GetRolesAsync(int limit = 20, int offset = 0, string search = "", CancellationToken cancellationToken = default)
     {
-        /*
-         * Search by role name & id
-         * Order by name, created date, creator? (paging)
-         */
-        return ListResult<AuthorityRole>.Failed("Not implemented!");
+        var searchResult = await roleRepository.GetRolesAsync(limit, offset, search, cancellationToken);
+        return searchResult;
     }
 
-    public async Task AddRoleToUserAsync(AuthorityUser user, AuthorityRole role, CancellationToken? cancellationToken = null)
+    public async Task AddRoleToUserAsync(AuthorityUser user, AuthorityRole role, CancellationToken cancellationToken = default)
     {
         /*
             - Validate User & Role
@@ -37,11 +39,11 @@ public partial class AuthorityManager
         */
     }
 
-    public async Task RemoveRoleFromUserAsync(AuthorityRole role, AuthorityUser user, CancellationToken? cancellationToken = null)
+    public async Task RemoveRoleFromUserAsync(AuthorityRole role, AuthorityUser user, CancellationToken cancellationToken = default)
     {
     }
 
-    public async Task AddRoleToGroupAsync(AuthorityRole role, AuthorityGroup group, CancellationToken? cancellationToken = null)
+    public async Task AddRoleToGroupAsync(AuthorityRole role, AuthorityGroup group, CancellationToken cancellationToken = default)
     {
     }
 
@@ -50,16 +52,34 @@ public partial class AuthorityManager
     /// </summary>
     /// <param name="user">The user to get the roles from</param>
     /// <param name="cancellationToken"></param>
-    public async Task<ListResult<AuthorityRole>> GetUserRolesAsync(AuthorityUser user, CancellationToken? cancellationToken = null)
+    public async Task<ListResult<AuthorityRole>> GetUserRolesAsync(AuthorityUser user, CancellationToken cancellationToken = default)
     {
-        /*
-         * - Validate user
-         * - Get user groups (id)
-         * - Get roles contained from user
-         * - Get roles contained from groups (if any)
-         * - Order by (for paging)
-         */
+        var usrValidation = await IsValidUserAsync(user, cancellationToken);
+        if (!usrValidation.Success)
+        {
+            return ListResult<AuthorityRole>.Failed("Invalid user");
+        }
         
+        List<AuthorityRole> roles = [];
+        var usrRoles = await GetUserRolesAsync(user, cancellationToken);
+        if (usrRoles.Success)
+        {
+            roles.AddRange(usrRoles.Items);
+        }
+        var usrGroups = await GetUserGroupsAsync(user, cancellationToken);
+        if (usrGroups.Success)
+        {
+            var groupRolesResult = await GetGroupRolesAsync(usrGroups.Items.Select(g => g.Id).ToList(), cancellationToken);
+            if (groupRolesResult.Success)
+            {
+                roles.AddRange(groupRolesResult.Items);
+            }
+        }
+        return ListResult<AuthorityRole>.Ok(roles, roles.Count);
+    }
+
+    public async Task<ListResult<AuthorityRole>> GetGroupRolesAsync(List<Guid> groupIds, CancellationToken cancellationToken = default)
+    {
         return ListResult<AuthorityRole>.Failed("Not implemented!");
     }
 }

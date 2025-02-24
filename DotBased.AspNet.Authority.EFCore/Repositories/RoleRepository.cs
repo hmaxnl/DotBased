@@ -114,4 +114,9 @@ public class RoleRepository(IDbContextFactory<AuthorityContext> contextFactory) 
             return HandleException("Failed to delete role!", e);
         }
     }
+
+    public async Task<ListResult<AuthorityRoleItem>> GetUserRolesAsync(AuthorityUser user, int limit = 20, int offset = 0, string search = "", CancellationToken cancellationToken = default)
+    {
+        return ListResult<AuthorityRoleItem>.Failed("Not implemented!");
+    }
 }

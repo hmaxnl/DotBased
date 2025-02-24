@@ -45,9 +45,7 @@ public partial class AuthorityManager
         var passwordValidation = await ValidatePasswordAsync(user, password);
         if (!passwordValidation.Success)
         {
-            List<ValidationError> errors = [];
-            errors.AddRange(passwordValidation.Errors);
-            return AuthorityResult<AuthorityUser>.Failed(errors, ResultFailReason.Validation);
+            return AuthorityResult<AuthorityUser>.Failed(passwordValidation.Errors, ResultFailReason.Validation);
         }
 
         user.PasswordHash = await PasswordHasher.HashPasswordAsync(password);

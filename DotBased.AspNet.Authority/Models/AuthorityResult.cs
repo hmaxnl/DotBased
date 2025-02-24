@@ -11,7 +11,7 @@ public class AuthorityResult<TResultValue> : Result<TResultValue>
         Reason = ResultFailReason.Unknown;
     }
     
-    public AuthorityResult(bool success, string errorMessage = "", TResultValue? value = default, ResultFailReason reason = ResultFailReason.None, List<ValidationError>? errors = null) : base(success, errorMessage, value, null)
+    public AuthorityResult(bool success, string errorMessage = "", TResultValue? value = default, ResultFailReason reason = ResultFailReason.None, IReadOnlyList<ValidationError>? errors = null) : base(success, errorMessage, value, null)
     {
         Success = success;
         Message = errorMessage;
@@ -20,7 +20,7 @@ public class AuthorityResult<TResultValue> : Result<TResultValue>
         ValidationErrors = errors;
     }
     public ResultFailReason Reason { get; }
-    public List<ValidationError>? ValidationErrors { get; }
+    public IReadOnlyList<ValidationError>? ValidationErrors { get; }
     
 
     public static AuthorityResult<TResultValue> Ok(TResultValue? value) => new AuthorityResult<TResultValue>(true, value:value);
@@ -28,7 +28,7 @@ public class AuthorityResult<TResultValue> : Result<TResultValue>
     public static AuthorityResult<TResultValue> Error(string errorMessage, ResultFailReason reason = ResultFailReason.Error) =>
         new AuthorityResult<TResultValue>(false, errorMessage, reason:reason);
 
-    public static AuthorityResult<TResultValue> Failed(List<ValidationError> errors, ResultFailReason reason = ResultFailReason.None)
+    public static AuthorityResult<TResultValue> Failed(IReadOnlyList<ValidationError> errors, ResultFailReason reason = ResultFailReason.None)
         => new AuthorityResult<TResultValue>(false, errors:errors, reason:reason);
 }
 

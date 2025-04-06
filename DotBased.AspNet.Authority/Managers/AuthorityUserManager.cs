@@ -91,7 +91,7 @@ public partial class AuthorityManager
 
     public async Task<Result> IsValidUserAsync(AuthorityUser user, CancellationToken cancellationToken = default)
     {
-        var usrResult = await userRepository.GetVersionAsync(user, cancellationToken);
+        var usrResult = await UserRepository.GetVersionAsync(user, cancellationToken);
         return usrResult;
     }
 }

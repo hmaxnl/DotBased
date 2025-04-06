@@ -15,13 +15,13 @@ public class AttributeRepository(IDbContextFactory<AuthorityContext> contextFact
             var query = context.Attributes.AsQueryable();
             if (!string.IsNullOrEmpty(search))
             {
-                query = query.Where(a => $"{a.AttributeKey} {a.BoundId} {a.AttributeValue}".Contains(search, StringComparison.CurrentCultureIgnoreCase));
+                query = query.Where(a => $"{a.AttributeKey} {a.ForeignKey} {a.AttributeValue}".Contains(search, StringComparison.CurrentCultureIgnoreCase));
             }
             
             var total = await query.CountAsync(cancellationToken);
             var select = await query.OrderBy(a => a.AttributeKey).Skip(offset).Take(limit).Select(a => new AuthorityAttributeItem()
             {
-                BoundId = a.BoundId,
+                BoundId = a.ForeignKey,
                 AttributeKey = a.AttributeKey,
                 AttributeValue = a.AttributeValue
             }).ToListAsync(cancellationToken);
@@ -52,7 +52,7 @@ public class AttributeRepository(IDbContextFactory<AuthorityContext> contextFact
         try
         {
             await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
-            if (string.IsNullOrWhiteSpace(attribute.AttributeKey) || attribute.BoundId == Guid.Empty)
+            if (string.IsNullOrWhiteSpace(attribute.AttributeKey) || attribute.ForeignKey == Guid.Empty)
             {
                 return Result<AuthorityAttribute>.Failed("Attribute key and/or bound id is empty");
             }

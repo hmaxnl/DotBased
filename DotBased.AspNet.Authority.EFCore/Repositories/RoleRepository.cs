@@ -1,8 +1,10 @@
+using DotBased.AspNet.Authority.EFCore.Models;
 using DotBased.AspNet.Authority.Models.Authority;
 using DotBased.AspNet.Authority.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace DotBased.AspNet.Authority.EFCore.Repositories;
+
 
 public class RoleRepository(IDbContextFactory<AuthorityContext> contextFactory) : RepositoryBase, IRoleRepository
 {
@@ -95,19 +97,18 @@ public class RoleRepository(IDbContextFactory<AuthorityContext> contextFactory) 
         }
     }
 
-    public async Task<Result> DeleteRoleAsync(AuthorityRole role, CancellationToken cancellationToken = default)
+    public async Task<Result> DeleteRolesAsync(List<AuthorityRole> roles, CancellationToken cancellationToken = default)
     {
         try
         {
             await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
-            var currentRole = await context.Roles.FirstOrDefaultAsync(r => r.Id == role.Id, cancellationToken: cancellationToken);
-            if (currentRole == null)
-            {
-                return Result.Failed("Role not found, could not delete!");
-            }
-            context.Roles.Remove(currentRole);
+            var roleIds = roles.Select(r => r.Id).ToList();
+            
+            context.Roles.RemoveRange(roles);
+            context.RoleLinks.RemoveRange(context.RoleLinks.Where(rg => roleIds.Contains(rg.RoleId)));
+            
             var saveResult = await context.SaveChangesAsync(cancellationToken);
-            return saveResult <= 0 ? Result.Failed("Failed to delete role!") : Result.Ok();
+            return saveResult <= 0 ? Result.Failed("Failed to delete roles!") : Result.Ok();
         }
         catch (Exception e)
         {
@@ -117,6 +118,89 @@ public class RoleRepository(IDbContextFactory<AuthorityContext> contextFactory) 
 
     public async Task<ListResult<AuthorityRoleItem>> GetUserRolesAsync(AuthorityUser user, int limit = 20, int offset = 0, string search = "", CancellationToken cancellationToken = default)
     {
-        return ListResult<AuthorityRoleItem>.Failed("Not implemented!");
+        try
+        {
+            await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+            var roleIds = await context.RoleLinks.Where(r => r.LinkId == user.Id).Select(i => i.RoleId).ToListAsync(cancellationToken: cancellationToken);
+            var rolesQuery = context.Roles.Where(r => roleIds.Contains(r.Id));
+            if (!string.IsNullOrEmpty(search))
+            {
+                rolesQuery = rolesQuery.Where(r => r.Name.Contains(search));
+            }
+
+            var roles = rolesQuery.Where(r => roleIds.Contains(r.Id)).Skip(offset).Take(limit).Select(r => new AuthorityRoleItem()
+            {
+                Id = r.Id,
+                Name = r.Name
+            });
+            return ListResult<AuthorityRoleItem>.Ok(roles, limit, offset);
+        }
+        catch (Exception e)
+        {
+            return HandleExceptionListResult<AuthorityRoleItem>("Failed to get user roles.", e);
+        }
+    }
+
+    public async Task<Result> AddRolesLinkAsync(List<AuthorityRole> roles, Guid linkId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+            foreach (var role in roles)
+            {
+                context.RoleLinks.Add(new RoleLink() { LinkId = linkId, RoleId = role.Id });
+            }
+            var saveResult = await context.SaveChangesAsync(cancellationToken);
+            return saveResult <= 0 ? Result.Failed("Failed to ad role link!") : Result.Ok();
+        }
+        catch (Exception e)
+        {
+            return HandleException("Failed to add role link!", e);
+        }
+    }
+
+    public async Task<ListResult<AuthorityRole>> GetLinkedRolesAsync(List<Guid> linkIds, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+            var linkedRoles = context.RoleLinks.Where(r => linkIds.Contains(r.LinkId)).Select(r => r.RoleId);
+            var roleList = await context.Roles.Where(r => linkedRoles.Contains(r.Id)).ToListAsync(cancellationToken);
+            return ListResult<AuthorityRole>.Ok(roleList.DistinctBy(r => r.Id));
+        }
+        catch (Exception e)
+        {
+            return HandleExceptionListResult<AuthorityRole>("Failed to get linked roles!", e);
+        }
+    }
+
+    public async Task<Result> DeleteRolesLinkAsync(List<AuthorityRole> roles, Guid linkId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+            var roleIds = roles.Select(r => r.Id).ToList();
+            context.RoleLinks.RemoveRange(context.RoleLinks.Where(rg => rg.LinkId == linkId && roleIds.Contains(rg.RoleId)));
+            var saveResult = await context.SaveChangesAsync(cancellationToken);
+            return saveResult <= 0 ? Result.Failed("Failed to delete role links!") : Result.Ok();
+        }
+        catch (Exception e)
+        {
+            return HandleException("Failed to delete role link!", e);
+        }
+    }
+
+    public async Task<ListResult<Guid>> HasRolesAsync(Guid linkId, List<AuthorityRole> roles, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+            var hasRoles = await context.RoleLinks.Where(r => r.LinkId == linkId && roles.Any(ar => ar.Id == r.RoleId)).Select(r => r.RoleId).ToListAsync(cancellationToken);
+            return ListResult<Guid>.Ok(hasRoles);
+        }
+        catch (Exception e)
+        {
+            return HandleExceptionListResult<Guid>("Failed to determine role for user!", e);
+        }
     }
 }

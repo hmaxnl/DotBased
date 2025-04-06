@@ -23,7 +23,7 @@ public class AuthorityResult<TResultValue> : Result<TResultValue>
     public IReadOnlyList<ValidationError>? ValidationErrors { get; }
     
 
-    public static AuthorityResult<TResultValue> Ok(TResultValue? value) => new AuthorityResult<TResultValue>(true, value:value);
+    public new static AuthorityResult<TResultValue> Ok(TResultValue? value) => new AuthorityResult<TResultValue>(true, value:value);
 
     public static AuthorityResult<TResultValue> Error(string errorMessage, ResultFailReason reason = ResultFailReason.Error) =>
         new AuthorityResult<TResultValue>(false, errorMessage, reason:reason);

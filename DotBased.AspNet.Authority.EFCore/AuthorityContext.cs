@@ -11,54 +11,47 @@ public class AuthorityContext(DbContextOptions<AuthorityContext> options) : DbCo
     public DbSet<AuthorityRole> Roles { get; set; }
     public DbSet<AuthorityUser> Users { get; set; }
     
-    public DbSet<RoleGroup> RoleGroup { get; set; }
-    public DbSet<RoleUser> RoleUser { get; set; }
-    public DbSet<UserGroup> UserGroup { get; set; }
+    public DbSet<RoleLink> RoleLinks { get; set; }
+    public DbSet<UserGroups> UserGroups { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AuthorityAttribute>(attributeEntity =>
         {
             attributeEntity.ToTable("authority_attributes");
-            attributeEntity.HasKey(a => new { a.BoundId, a.AttributeKey });
+            attributeEntity.HasKey(a => new { a.ForeignKey, a.AttributeKey });
         });
 
         modelBuilder.Entity<AuthorityGroup>(groupEntity =>
         {
             groupEntity.ToTable("authority_groups");
             groupEntity.HasKey(x => x.Id);
-            groupEntity.HasMany(g => g.Attributes).WithOne().HasForeignKey(a => a.BoundId).OnDelete(DeleteBehavior.Cascade);
+            groupEntity.HasMany(g => g.Attributes).WithOne().HasForeignKey(a => a.ForeignKey).OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<AuthorityRole>(roleEntity =>
         {
             roleEntity.ToTable("authority_roles");
             roleEntity.HasKey(x => x.Id);
-            roleEntity.HasMany(r => r.Attributes).WithOne().HasForeignKey(a => a.BoundId).OnDelete(DeleteBehavior.Cascade);
+            roleEntity.HasMany(r => r.Attributes).WithOne().HasForeignKey(a => a.ForeignKey).OnDelete(DeleteBehavior.Cascade);
         });
         
         modelBuilder.Entity<AuthorityUser>(userEntity =>
         {
             userEntity.ToTable("authority_users");
             userEntity.HasKey(x => x.Id);
-            userEntity.HasMany(u => u.Attributes).WithOne().HasForeignKey(a => a.BoundId).OnDelete(DeleteBehavior.Cascade);
+            userEntity.HasMany(u => u.Attributes).WithOne().HasForeignKey(a => a.ForeignKey).OnDelete(DeleteBehavior.Cascade);
         });
 
-        modelBuilder.Entity<RoleGroup>(rgEntity =>
+        modelBuilder.Entity<RoleLink>(rgEntity =>
         {
-            rgEntity.ToTable("role_group");
-            rgEntity.HasKey(rg => new { rg.RoleId, rg.GroupId });
+            rgEntity.ToTable("role_links");
+            rgEntity.HasKey(rg => new { rg.RoleId, rg.LinkId });
         });
 
-        modelBuilder.Entity<RoleUser>(ruEntity =>
+        modelBuilder.Entity<UserGroups>(ugEntity =>
         {
-            ruEntity.ToTable("role_user");
-            ruEntity.HasKey(ru => new { ru.RoleId, ru.UserId });
-        });
-
-        modelBuilder.Entity<UserGroup>(ugEntity =>
-        {
-            ugEntity.ToTable("user_group");
+            ugEntity.ToTable("user_groups");
             ugEntity.HasKey(ug => new { ug.UserId, ug.GroupId });
         });
         

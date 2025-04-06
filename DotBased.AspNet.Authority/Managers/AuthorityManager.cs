@@ -14,6 +14,7 @@ public partial class AuthorityManager(
     IServiceProvider services,
     ICryptographer cryptographer,
     IUserRepository userRepository,
+    IGroupRepository groupRepository,
     IRoleRepository roleRepository,
     IPasswordHasher passwordHasher)
 {
@@ -24,6 +25,7 @@ public partial class AuthorityManager(
     public ICryptographer Cryptographer { get; } = cryptographer;
 
     public IUserRepository UserRepository { get; } = userRepository;
+    public IGroupRepository GroupRepository { get; } = groupRepository;
     public IRoleRepository RoleRepository { get; } = roleRepository;
 
     public IPasswordHasher PasswordHasher { get; } = passwordHasher;

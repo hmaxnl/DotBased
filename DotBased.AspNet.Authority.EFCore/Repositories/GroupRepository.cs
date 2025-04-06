@@ -48,6 +48,21 @@ public class GroupRepository(IDbContextFactory<AuthorityContext> contextFactory)
         }
     }
 
+    public async Task<ListResult<AuthorityGroup>> GetUserGroupsAsync(AuthorityUser user, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+            var userJoinGroups = context.UserGroups.Where(ug => ug.UserId == user.Id).Select(ug => ug.GroupId);
+            var userGroups = context.Groups.Where(g => userJoinGroups.Contains(g.Id));
+            return ListResult<AuthorityGroup>.Ok(userGroups, userGroups.Count());
+        }
+        catch (Exception e)
+        {
+            return HandleExceptionListResult<AuthorityGroup>("Failed to get Groups", e);
+        }
+    }
+
     public async Task<Result<AuthorityGroup>> CreateGroupAsync(AuthorityGroup group, CancellationToken cancellationToken = default)
     {
         try

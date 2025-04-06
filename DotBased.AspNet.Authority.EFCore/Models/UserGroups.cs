@@ -1,7 +1,7 @@
 namespace DotBased.AspNet.Authority.EFCore.Models;
 
-public class RoleUser
+public class UserGroups
 {
-    public Guid RoleId { get; set; }
     public Guid UserId { get; set; }
+    public Guid GroupId { get; set; }
 }

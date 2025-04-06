@@ -9,7 +9,7 @@ public class AuthorityRole()
 
     public Guid Id { get; set; } = Guid.NewGuid();
 
-    public string? Name { get; set; }
+    public string Name { get; set; } = string.Empty;
 
     public long Version { get; set; }
 
@@ -17,5 +17,5 @@ public class AuthorityRole()
 
     public IEnumerable<AuthorityAttribute> Attributes { get; set; } = [];
 
-    public override string ToString() => Name ?? string.Empty;
+    public override string ToString() => Name;
 }

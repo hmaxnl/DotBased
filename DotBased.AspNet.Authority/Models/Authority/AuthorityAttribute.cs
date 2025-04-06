@@ -1,12 +1,8 @@
 namespace DotBased.AspNet.Authority.Models.Authority;
 
-public class AuthorityAttribute(string attributeKey, Guid bound)
+public class AuthorityAttribute(string attributeKey, Guid foreignKey)
 {
-    public AuthorityAttribute() : this(string.Empty, Guid.NewGuid())
-    {
-    }
-
-    public Guid BoundId { get; set; } = bound;
+    public Guid ForeignKey { get; set; } = foreignKey;
     
     public string AttributeKey { get; set; } = attributeKey;
 

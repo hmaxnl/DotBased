@@ -44,7 +44,7 @@ public class Result<TValue> : Result
     public new static Result<TValue> Failed(string message, Exception? exception = null) =>
         new(false, message, default, exception);
 
-    public new static Result<TValue> HandleResult(TValue? value, string failedMessage, Exception? exception = null)
+    public static Result<TValue> HandleResult(TValue? value, string failedMessage, Exception? exception = null)
     {
         return value == null ? Failed(failedMessage, exception) : Ok(value);
     }
@@ -56,6 +56,8 @@ public class ListResult<TItem> : Result
     {
         Items = items != null ? new List<TItem>(items) : new List<TItem>();
         TotalCount = totalCount;
+        Limit = limit;
+        Offset = offset;
     }
 
     public ListResult(Result bObj) : base(bObj)
@@ -85,8 +87,8 @@ public class ListResult<TItem> : Result
     public int Offset { get; }
 
     public static ListResult<TItem> Ok(IEnumerable<TItem> items, int totalCount = -1, int limit = -1, int offset = -1) =>
-        new(true, string.Empty, totalCount, items);
+        new(true, string.Empty, totalCount, items, limit, offset);
 
     public new static ListResult<TItem> Failed(string message, Exception? exception = null) =>
-        new(false, message, -1, null);
+        new(false, message, -1, null, exception: exception);
 }

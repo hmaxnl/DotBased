@@ -6,7 +6,7 @@ namespace DotBased.AspNet.Authority.EFCore.Repositories;
 
 public class UserRepository(IDbContextFactory<AuthorityContext> contextFactory) : RepositoryBase, IUserRepository
 {
-    public async Task<ListResult<AuthorityUserItem>> GetAuthorityUsersAsync(int limit = 20, int offset = 0, string search = "", CancellationToken cancellationToken = default)
+    public async Task<ListResultOld<AuthorityUserItem>> GetAuthorityUsersAsync(int limit = 20, int offset = 0, string search = "", CancellationToken cancellationToken = default)
     {
         try
         {
@@ -26,7 +26,7 @@ public class UserRepository(IDbContextFactory<AuthorityContext> contextFactory) 
                 EmailAddress = u.EmailAddress,
                 PhoneNumber = u.PhoneNumber
             }).ToListAsync(cancellationToken: cancellationToken);
-            return ListResult<AuthorityUserItem>.Ok(selected, totalCount, limit, offset);
+            return ListResultOld<AuthorityUserItem>.Ok(selected, totalCount, limit, offset);
         }
         catch (Exception e)
         {
@@ -34,18 +34,18 @@ public class UserRepository(IDbContextFactory<AuthorityContext> contextFactory) 
         }
     }
 
-    public async Task<Result<AuthorityUser>> GetAuthorityUserByIdAsync(string id, CancellationToken cancellationToken = default)
+    public async Task<ResultOld<AuthorityUser>> GetAuthorityUserByIdAsync(string id, CancellationToken cancellationToken = default)
     {
         try
         {
             await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
             if (!Guid.TryParse(id, out var guid))
             {
-                return Result<AuthorityUser>.Failed("Invalid id!");
+                return ResultOld<AuthorityUser>.Failed("Invalid id!");
             }
 
             var user = await context.Users.Where(u => u.Id == guid).Include(u => u.Attributes).FirstOrDefaultAsync(cancellationToken: cancellationToken);
-            return Result<AuthorityUser>.HandleResult(user, "User not found.");
+            return ResultOld<AuthorityUser>.HandleResult(user, "User not found.");
         }
         catch (Exception e)
         {
@@ -53,18 +53,18 @@ public class UserRepository(IDbContextFactory<AuthorityContext> contextFactory) 
         }
     }
 
-    public async Task<Result<AuthorityUser>> CreateUserAsync(AuthorityUser user, CancellationToken cancellationToken = default)
+    public async Task<ResultOld<AuthorityUser>> CreateUserAsync(AuthorityUser user, CancellationToken cancellationToken = default)
     {
         try
         {
             await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
             if (user.Id == Guid.Empty)
             {
-                return Result<AuthorityUser>.Failed("Id cannot be empty!");
+                return ResultOld<AuthorityUser>.Failed("Id cannot be empty!");
             }
             var entity = context.Users.Add(user);
             var saveResult = await context.SaveChangesAsync(cancellationToken);
-            return saveResult <= 0 ? Result<AuthorityUser>.Failed("Failed to create user!") : Result<AuthorityUser>.Ok(entity.Entity);
+            return saveResult <= 0 ? ResultOld<AuthorityUser>.Failed("Failed to create user!") : ResultOld<AuthorityUser>.Ok(entity.Entity);
         }
         catch (Exception e)
         {
@@ -72,7 +72,7 @@ public class UserRepository(IDbContextFactory<AuthorityContext> contextFactory) 
         }
     }
 
-    public async Task<Result<AuthorityUser>> UpdateUserAsync(AuthorityUser user, CancellationToken cancellationToken = default)
+    public async Task<ResultOld<AuthorityUser>> UpdateUserAsync(AuthorityUser user, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -80,17 +80,17 @@ public class UserRepository(IDbContextFactory<AuthorityContext> contextFactory) 
             var usr = await context.Users.FirstOrDefaultAsync(u => u.Id == user.Id, cancellationToken: cancellationToken);
             if (usr == null)
             {
-                return Result<AuthorityUser>.Failed("User not found!");
+                return ResultOld<AuthorityUser>.Failed("User not found!");
             }
 
             if (usr.Version != user.Version || usr.SecurityVersion != user.SecurityVersion)
             {
-                return Result<AuthorityUser>.Failed("Version validation failed!");
+                return ResultOld<AuthorityUser>.Failed("Version validation failed!");
             }
             
             var entity = context.Users.Update(user);
             var saveResult = await context.SaveChangesAsync(cancellationToken);
-            return saveResult <= 0 ? Result<AuthorityUser>.Failed("Failed to save updated user!") : Result<AuthorityUser>.Ok(entity.Entity);
+            return saveResult <= 0 ? ResultOld<AuthorityUser>.Failed("Failed to save updated user!") : ResultOld<AuthorityUser>.Ok(entity.Entity);
         }
         catch (Exception e)
         {
@@ -98,7 +98,7 @@ public class UserRepository(IDbContextFactory<AuthorityContext> contextFactory) 
         }
     }
 
-    public async Task<Result> DeleteUserAsync(AuthorityUser user, CancellationToken cancellationToken = default)
+    public async Task<ResultOld> DeleteUserAsync(AuthorityUser user, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -106,11 +106,11 @@ public class UserRepository(IDbContextFactory<AuthorityContext> contextFactory) 
             var usr = await context.Users.FirstOrDefaultAsync(u => u.Id == user.Id, cancellationToken: cancellationToken);
             if (usr == null)
             {
-                return Result.Failed("User not found!");
+                return ResultOld.Failed("User not found!");
             }
             context.Users.Remove(usr);
             var saveResult = await context.SaveChangesAsync(cancellationToken);
-            return saveResult <= 0 ? Result.Failed("Failed to delete user!") : Result.Ok();
+            return saveResult <= 0 ? ResultOld.Failed("Failed to delete user!") : ResultOld.Ok();
         }
         catch (Exception e)
         {
@@ -118,13 +118,13 @@ public class UserRepository(IDbContextFactory<AuthorityContext> contextFactory) 
         }
     }
 
-    public async Task<Result<AuthorityUser>> GetUserByEmailAsync(string email, CancellationToken cancellationToken = default)
+    public async Task<ResultOld<AuthorityUser>> GetUserByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
         try
         {
             await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
             var usr = await context.Users.Where(u => u.EmailAddress == email).Include(u => u.Attributes).FirstOrDefaultAsync(cancellationToken: cancellationToken);
-            return Result<AuthorityUser>.HandleResult(usr, "User not found by given email address.");
+            return ResultOld<AuthorityUser>.HandleResult(usr, "User not found by given email address.");
         }
         catch (Exception e)
         {
@@ -132,7 +132,7 @@ public class UserRepository(IDbContextFactory<AuthorityContext> contextFactory) 
         }
     }
 
-    public async Task<Result> SetVersionAsync(AuthorityUser user, long version, CancellationToken cancellationToken = default)
+    public async Task<ResultOld> SetVersionAsync(AuthorityUser user, long version, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -140,18 +140,18 @@ public class UserRepository(IDbContextFactory<AuthorityContext> contextFactory) 
             var usr = await context.Users.FirstOrDefaultAsync(u => u.Id == user.Id, cancellationToken);
             if (usr == null)
             {
-                return Result.Failed("Failed to find user with given id!");
+                return ResultOld.Failed("Failed to find user with given id!");
             }
 
             if (usr.Version != user.Version)
             {
-                return Result.Failed("Stored user version doesn't match current user version!");
+                return ResultOld.Failed("Stored user version doesn't match current user version!");
             }
             
             usr.Version = version;
             context.Users.Update(usr);
             var saveResult = await context.SaveChangesAsync(cancellationToken);
-            return saveResult <= 0 ? Result.Failed("Failed to update user!") : Result.Ok();
+            return saveResult <= 0 ? ResultOld.Failed("Failed to update user!") : ResultOld.Ok();
         }
         catch (Exception e)
         {
@@ -159,13 +159,13 @@ public class UserRepository(IDbContextFactory<AuthorityContext> contextFactory) 
         }
     }
 
-    public async Task<Result<long>> GetVersionAsync(AuthorityUser user, CancellationToken cancellationToken = default)
+    public async Task<ResultOld<long>> GetVersionAsync(AuthorityUser user, CancellationToken cancellationToken = default)
     {
         try
         {
             await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
             var usrVersion = await context.Users.Where(u => u.Id == user.Id).Select(u => u.Version).FirstOrDefaultAsync(cancellationToken);
-            return Result<long>.HandleResult(usrVersion, "Failed to get user version!");
+            return ResultOld<long>.HandleResult(usrVersion, "Failed to get user version!");
         }
         catch (Exception e)
         {
@@ -173,7 +173,7 @@ public class UserRepository(IDbContextFactory<AuthorityContext> contextFactory) 
         }
     }
 
-    public async Task<Result> SetSecurityVersionAsync(AuthorityUser user, long securityVersion, CancellationToken cancellationToken = default)
+    public async Task<ResultOld> SetSecurityVersionAsync(AuthorityUser user, long securityVersion, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -181,18 +181,18 @@ public class UserRepository(IDbContextFactory<AuthorityContext> contextFactory) 
             var usr = await context.Users.FirstOrDefaultAsync(u => u.Id == user.Id, cancellationToken);
             if (usr == null)
             {
-                return Result.Failed("Failed to find user with given id!");
+                return ResultOld.Failed("Failed to find user with given id!");
             }
 
             if (usr.SecurityVersion != user.SecurityVersion)
             {
-                return Result.Failed("Stored user version doesn't match current user version!");
+                return ResultOld.Failed("Stored user version doesn't match current user version!");
             }
             
             usr.SecurityVersion = securityVersion;
             context.Users.Update(usr);
             var saveResult = await context.SaveChangesAsync(cancellationToken);
-            return saveResult <= 0 ? Result.Failed("Failed to update user!") : Result.Ok();
+            return saveResult <= 0 ? ResultOld.Failed("Failed to update user!") : ResultOld.Ok();
         }
         catch (Exception e)
         {
@@ -200,13 +200,13 @@ public class UserRepository(IDbContextFactory<AuthorityContext> contextFactory) 
         }
     }
 
-    public async Task<Result<long>> GetSecurityVersionAsync(AuthorityUser user, CancellationToken cancellationToken = default)
+    public async Task<ResultOld<long>> GetSecurityVersionAsync(AuthorityUser user, CancellationToken cancellationToken = default)
     {
         try
         {
             await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
             var usrVersion = await context.Users.Where(u => u.Id == user.Id).Select(u => u.SecurityVersion).FirstOrDefaultAsync(cancellationToken);
-            return Result<long>.HandleResult(usrVersion, "Failed to get user security version!");
+            return ResultOld<long>.HandleResult(usrVersion, "Failed to get user security version!");
         }
         catch (Exception e)
         {

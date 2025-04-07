@@ -7,12 +7,12 @@ public static class Cryptography
     /*
      * https://gist.github.com/therightstuff/aa65356e95f8d0aae888e9f61aa29414
      */
-    public static Result<string> ExportPublicKeyToPem(RSACryptoServiceProvider csp)
+    public static ResultOld<string> ExportPublicKeyToPem(RSACryptoServiceProvider csp)
     {
         var outputStream = new StringWriter();
         var parameters = csp.ExportParameters(false);
         if (parameters.Exponent == null || parameters.Modulus == null)
-            return Result<string>.Failed("RSAParameters are empty!");
+            return ResultOld<string>.Failed("RSAParameters are empty!");
         using (var stream = new MemoryStream())
         {
             var writer = new BinaryWriter(stream);
@@ -66,7 +66,7 @@ public static class Cryptography
             outputStream.Write("-----END PUBLIC KEY-----");
         }
 
-        return Result<string>.Ok(outputStream.ToString());
+        return ResultOld<string>.Ok(outputStream.ToString());
     }
         
     private static void EncodeLength(BinaryWriter stream, int length)

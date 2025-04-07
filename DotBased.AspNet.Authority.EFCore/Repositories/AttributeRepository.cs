@@ -6,7 +6,7 @@ namespace DotBased.AspNet.Authority.EFCore.Repositories;
 
 public class AttributeRepository(IDbContextFactory<AuthorityContext> contextFactory) : RepositoryBase, IAttributeRepository
 {
-    public async Task<ListResult<AuthorityAttributeItem>> GetAttributesAsync(int limit = 20, int offset = 0, string search = "",
+    public async Task<ListResultOld<AuthorityAttributeItem>> GetAttributesAsync(int limit = 20, int offset = 0, string search = "",
         CancellationToken cancellationToken = default)
     {
         try
@@ -25,7 +25,7 @@ public class AttributeRepository(IDbContextFactory<AuthorityContext> contextFact
                 AttributeKey = a.AttributeKey,
                 AttributeValue = a.AttributeValue
             }).ToListAsync(cancellationToken);
-            return ListResult<AuthorityAttributeItem>.Ok(select, total, limit, offset);
+            return ListResultOld<AuthorityAttributeItem>.Ok(select, total, limit, offset);
         }
         catch (Exception e)
         {
@@ -33,13 +33,13 @@ public class AttributeRepository(IDbContextFactory<AuthorityContext> contextFact
         }
     }
 
-    public async Task<Result<AuthorityAttribute>> GetAttributeByKeyAsync(string key, CancellationToken cancellationToken = default)
+    public async Task<ResultOld<AuthorityAttribute>> GetAttributeByKeyAsync(string key, CancellationToken cancellationToken = default)
     {
         try
         {
             await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
             var attribute = await context.Attributes.FirstOrDefaultAsync(a => a.AttributeKey == key, cancellationToken);
-            return attribute == null ? Result<AuthorityAttribute>.Failed("Attribute not found") : Result<AuthorityAttribute>.Ok(attribute);
+            return attribute == null ? ResultOld<AuthorityAttribute>.Failed("Attribute not found") : ResultOld<AuthorityAttribute>.Ok(attribute);
         }
         catch (Exception e)
         {
@@ -47,18 +47,18 @@ public class AttributeRepository(IDbContextFactory<AuthorityContext> contextFact
         }
     }
 
-    public async Task<Result<AuthorityAttribute>> CreateAttributeAsync(AuthorityAttribute attribute, CancellationToken cancellationToken = default)
+    public async Task<ResultOld<AuthorityAttribute>> CreateAttributeAsync(AuthorityAttribute attribute, CancellationToken cancellationToken = default)
     {
         try
         {
             await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
             if (string.IsNullOrWhiteSpace(attribute.AttributeKey) || attribute.ForeignKey == Guid.Empty)
             {
-                return Result<AuthorityAttribute>.Failed("Attribute key and/or bound id is empty");
+                return ResultOld<AuthorityAttribute>.Failed("Attribute key and/or bound id is empty");
             }
             var entry = context.Attributes.Add(attribute);
             var saveResult = await context.SaveChangesAsync(cancellationToken);
-            return saveResult <= 0 ? Result<AuthorityAttribute>.Failed("Failed to create attribute") : Result<AuthorityAttribute>.Ok(entry.Entity);
+            return saveResult <= 0 ? ResultOld<AuthorityAttribute>.Failed("Failed to create attribute") : ResultOld<AuthorityAttribute>.Ok(entry.Entity);
         }
         catch (Exception e)
         {
@@ -66,7 +66,7 @@ public class AttributeRepository(IDbContextFactory<AuthorityContext> contextFact
         }
     }
 
-    public async Task<Result<AuthorityAttribute>> UpdateAttributeAsync(AuthorityAttribute attribute, CancellationToken cancellationToken = default)
+    public async Task<ResultOld<AuthorityAttribute>> UpdateAttributeAsync(AuthorityAttribute attribute, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -74,17 +74,17 @@ public class AttributeRepository(IDbContextFactory<AuthorityContext> contextFact
             var currentAttribute = await context.Attributes.FirstOrDefaultAsync(a => a.AttributeKey == attribute.AttributeKey, cancellationToken);
             if (currentAttribute == null)
             {
-                return Result<AuthorityAttribute>.Failed("Attribute not found");
+                return ResultOld<AuthorityAttribute>.Failed("Attribute not found");
             }
 
             if (currentAttribute.Version != attribute.Version)
             {
-                return Result<AuthorityAttribute>.Failed("Attribute version doesn't match");
+                return ResultOld<AuthorityAttribute>.Failed("Attribute version doesn't match");
             }
             
             var entry = context.Attributes.Update(currentAttribute);
             var saveResult = await context.SaveChangesAsync(cancellationToken);
-            return saveResult <= 0 ? Result<AuthorityAttribute>.Failed("Failed to update attribute") : Result<AuthorityAttribute>.Ok(entry.Entity);
+            return saveResult <= 0 ? ResultOld<AuthorityAttribute>.Failed("Failed to update attribute") : ResultOld<AuthorityAttribute>.Ok(entry.Entity);
         }
         catch (Exception e)
         {
@@ -92,7 +92,7 @@ public class AttributeRepository(IDbContextFactory<AuthorityContext> contextFact
         }
     }
 
-    public async Task<Result> DeleteAttributeAsync(AuthorityAttribute attribute, CancellationToken cancellationToken = default)
+    public async Task<ResultOld> DeleteAttributeAsync(AuthorityAttribute attribute, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -100,11 +100,11 @@ public class AttributeRepository(IDbContextFactory<AuthorityContext> contextFact
             var currentAttribute = await context.Attributes.FirstOrDefaultAsync(a => a.AttributeKey == attribute.AttributeKey, cancellationToken);
             if (currentAttribute == null)
             {
-                return Result.Failed("Attribute not found");
+                return ResultOld.Failed("Attribute not found");
             }
             context.Attributes.Remove(currentAttribute);
             var saveResult = await context.SaveChangesAsync(cancellationToken);
-            return saveResult <= 0 ? Result.Failed("Failed to delete attribute") : Result.Ok();
+            return saveResult <= 0 ? ResultOld.Failed("Failed to delete attribute") : ResultOld.Ok();
         }
         catch (Exception e)
         {

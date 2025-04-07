@@ -10,27 +10,39 @@ public class Result
     protected Result(Exception exception)
     {
         IsSuccess = false;
-        Information = ResultInformation.Error(exception);
+        Error = ResultError.Error(exception);
     }
 
-    protected Result(ResultInformation information)
+    protected Result(ResultError error)
     {
         IsSuccess = false;
-        Information = information;
+        Error = error;
     }
 
     public bool IsSuccess { get; }
-    public ResultInformation? Information { get; set; }
+    public ResultError? Error { get; set; }
     
     public static implicit operator Result(Exception exception) => new(exception);
-    public static implicit operator Result(ResultInformation information) => new(information);
+    public static implicit operator Result(ResultError error) => new(error);
 
     public static Result Success() => new();
-    public static Result Error(ResultInformation information) => new(information);
-    public static Result Fail(Exception exception) => new(exception);
+    public static Result Fail(ResultError error) => new(error);
+    public static Result Exception(Exception exception) => new(exception);
     
     
-    public TMatch Match<TMatch>(Func<TMatch> success, Func<ResultInformation, TMatch> failure) => IsSuccess ? success() : failure(Information!);
+    public TMatch Match<TMatch>(Func<TMatch> success, Func<ResultError, TMatch> failure) => IsSuccess ? success() : failure(Error!);
+
+    public void Match(Action success, Action<ResultError> failure)
+    {
+        if (IsSuccess)
+        {
+            success();
+        }
+        else
+        {
+            failure(Error!);
+        }
+    }
 }
 
 public class Result<TResult> : Result
@@ -45,7 +57,7 @@ public class Result<TResult> : Result
         _result = default;
     }
     
-    protected Result(ResultInformation information) : base(information)
+    protected Result(ResultError error) : base(error)
     {
         _result = default;
     }
@@ -55,30 +67,27 @@ public class Result<TResult> : Result
 
     public static implicit operator Result<TResult>(TResult result) => new(result);
     public static implicit operator Result<TResult>(Exception exception) => new(exception);
-    public static implicit operator Result<TResult>(ResultInformation information) => new(information);
+    public static implicit operator Result<TResult>(ResultError error) => new(error);
     
     public static Result<TResult> Success(TResult result) => new(result);
-    public new static Result<TResult> Error(ResultInformation information) => new(information);
-    public new static Result<TResult> Fail(Exception exception) => new(exception);
+    public new static Result<TResult> Fail(ResultError error) => new(error);
+    public new static Result<TResult> Exception(Exception exception) => new(exception);
     
-    public TMatch Match<TMatch>(Func<TResult, TMatch> success, Func<ResultInformation, TMatch> failure)
-    {
-        return IsSuccess && _result != null ? success(_result) : failure(Information ?? ResultInformation.Fail("No error and value is null!"));
-    }
+    public TMatch Match<TMatch>(Func<TResult, TMatch> success, Func<ResultError, TMatch> failure) => 
+        IsSuccess && Value != null ? success(Value) : failure(Error ?? ResultError.Fail("No error and value is null!"));
 }
 
-public class ResultInformation
+public class ResultError
 {
-    private ResultInformation(string message, Exception? exception)
+    private ResultError(string description, Exception? exception)
     {
-        Message = message;
+        Description = description;
         Exception = exception;
     }
 
-    public string Message { get; }
+    public string Description { get; }
     public Exception? Exception { get; }
 
-    public static ResultInformation Info(string message) => new(message, null);
-    public static ResultInformation Fail(string message) => new(message, null);
-    public static ResultInformation Error(Exception exception, string message = "") => new(message, exception);
+    public static ResultError Fail(string description) => new(description, null);
+    public static ResultError Error(Exception exception, string description = "") => new(description, exception);
 }

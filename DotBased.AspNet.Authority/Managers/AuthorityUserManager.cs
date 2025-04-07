@@ -34,28 +34,28 @@ public partial class AuthorityManager
         return errors.Count > 0 ? ValidationResult.Failed(errors) : ValidationResult.Ok();
     }
 
-    public async Task<ListResult<AuthorityUserItem>> SearchUsersAsync(string query, int maxResults = 20, int offset = 0, CancellationToken cancellationToken = default)
+    public async Task<ListResultOld<AuthorityUserItem>> SearchUsersAsync(string query, int maxResults = 20, int offset = 0, CancellationToken cancellationToken = default)
     {
         var result = await UserRepository.GetAuthorityUsersAsync(maxResults, offset, query, cancellationToken);
         return result;
     }
 
-    public async Task<AuthorityResult<AuthorityUser>> UpdatePasswordAsync(AuthorityUser user, string password, CancellationToken cancellationToken = default)
+    public async Task<AuthorityResultOldOld<AuthorityUser>> UpdatePasswordAsync(AuthorityUser user, string password, CancellationToken cancellationToken = default)
     {
         var passwordValidation = await ValidatePasswordAsync(user, password);
         if (!passwordValidation.Success)
         {
-            return AuthorityResult<AuthorityUser>.Failed(passwordValidation.Errors, ResultFailReason.Validation);
+            return AuthorityResultOldOld<AuthorityUser>.Failed(passwordValidation.Errors, ResultFailReason.Validation);
         }
 
         user.PasswordHash = await PasswordHasher.HashPasswordAsync(password);
         user.SecurityVersion = GenerateVersion();
 
         var updateResult = await UserRepository.UpdateUserAsync(user, cancellationToken);
-        return AuthorityResult<AuthorityUser>.FromResult(updateResult);
+        return AuthorityResultOldOld<AuthorityUser>.FromResult(updateResult);
     }
 
-    public async Task<AuthorityResult<AuthorityUser>> CreateUserAsync(AuthorityUser userModel, string password, CancellationToken cancellationToken = default)
+    public async Task<AuthorityResultOldOld<AuthorityUser>> CreateUserAsync(AuthorityUser userModel, string password, CancellationToken cancellationToken = default)
     {
         var userValidation = await ValidateUserAsync(userModel);
         var passwordValidation = await ValidatePasswordAsync(userModel, password);
@@ -64,7 +64,7 @@ public partial class AuthorityManager
             List<ValidationError> errors = [];
             errors.AddRange(userValidation.Errors);
             errors.AddRange(passwordValidation.Errors);
-            return AuthorityResult<AuthorityUser>.Failed(errors, ResultFailReason.Validation);
+            return AuthorityResultOldOld<AuthorityUser>.Failed(errors, ResultFailReason.Validation);
         }
         
         userModel.Version = GenerateVersion();
@@ -74,22 +74,22 @@ public partial class AuthorityManager
 
         var userCreationResult = await UserRepository.CreateUserAsync(userModel, cancellationToken);
         
-        return AuthorityResult<AuthorityUser>.FromResult(userCreationResult);
+        return AuthorityResultOldOld<AuthorityUser>.FromResult(userCreationResult);
     }
 
-    public async Task<Result<AuthorityUser>> UpdateUserAsync(AuthorityUser model, CancellationToken cancellationToken = default)
+    public async Task<ResultOld<AuthorityUser>> UpdateUserAsync(AuthorityUser model, CancellationToken cancellationToken = default)
     {
         var updateResult = await UserRepository.UpdateUserAsync(model, cancellationToken);
         return updateResult;
     }
 
-    public async Task<Result> DeleteUserAsync(AuthorityUser model, CancellationToken cancellationToken = default)
+    public async Task<ResultOld> DeleteUserAsync(AuthorityUser model, CancellationToken cancellationToken = default)
     {
         var deleteResult = await UserRepository.DeleteUserAsync(model, cancellationToken);
         return deleteResult;
     }
 
-    public async Task<Result> IsValidUserAsync(AuthorityUser user, CancellationToken cancellationToken = default)
+    public async Task<ResultOld> IsValidUserAsync(AuthorityUser user, CancellationToken cancellationToken = default)
     {
         var usrResult = await UserRepository.GetVersionAsync(user, cancellationToken);
         return usrResult;

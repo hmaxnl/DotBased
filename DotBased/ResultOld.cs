@@ -3,16 +3,16 @@ namespace DotBased;
 /// <summary>
 /// Simple result class for returning a result state or a message and an exception.
 /// </summary>
-public class Result
+public class ResultOld
 {
-    public Result(bool success, string message, Exception? exception)
+    public ResultOld(bool success, string message, Exception? exception)
     {
         Success = success;
         Message = message;
         Exception = exception;
     }
 
-    public Result(Result bObj)
+    public ResultOld(ResultOld bObj)
     {
         Success = bObj.Success;
         Message = bObj.Message;
@@ -23,36 +23,36 @@ public class Result
     public string Message { get; set; }
     public Exception? Exception { get; set; }
 
-    public static Result Ok() => new(true, string.Empty, null);
-    public static Result Failed(string message, Exception? exception = null) => new(false, message, exception);
+    public static ResultOld Ok() => new(true, string.Empty, null);
+    public static ResultOld Failed(string message, Exception? exception = null) => new(false, message, exception);
 }
 
-public class Result<TValue> : Result
+public class ResultOld<TValue> : ResultOld
 {
-    public Result(bool success, string message, TValue? value, Exception? exception) : base(success, message, exception)
+    public ResultOld(bool success, string message, TValue? value, Exception? exception) : base(success, message, exception)
     {
         Value = value;
     }
-    public Result(Result bObj) : base(bObj)
+    public ResultOld(ResultOld bObj) : base(bObj)
     {
         
     }
     public TValue? Value { get; set; }
 
-    public static Result<TValue> Ok(TValue value) => new(true, string.Empty, value, null);
+    public static ResultOld<TValue> Ok(TValue value) => new(true, string.Empty, value, null);
 
-    public new static Result<TValue> Failed(string message, Exception? exception = null) =>
+    public new static ResultOld<TValue> Failed(string message, Exception? exception = null) =>
         new(false, message, default, exception);
 
-    public static Result<TValue> HandleResult(TValue? value, string failedMessage, Exception? exception = null)
+    public static ResultOld<TValue> HandleResult(TValue? value, string failedMessage, Exception? exception = null)
     {
         return value == null ? Failed(failedMessage, exception) : Ok(value);
     }
 }
 
-public class ListResult<TItem> : Result
+public class ListResultOld<TItem> : ResultOld
 {
-    public ListResult(bool success, string message, int totalCount, IEnumerable<TItem>? items, int limit = -1, int offset = -1, Exception? exception = null) : base(success, message, exception)
+    public ListResultOld(bool success, string message, int totalCount, IEnumerable<TItem>? items, int limit = -1, int offset = -1, Exception? exception = null) : base(success, message, exception)
     {
         Items = items != null ? new List<TItem>(items) : new List<TItem>();
         TotalCount = totalCount;
@@ -60,7 +60,7 @@ public class ListResult<TItem> : Result
         Offset = offset;
     }
 
-    public ListResult(Result bObj) : base(bObj)
+    public ListResultOld(ResultOld bObj) : base(bObj)
     {
         Items = new List<TItem>();
     }
@@ -86,9 +86,9 @@ public class ListResult<TItem> : Result
     /// </summary>
     public int Offset { get; }
 
-    public static ListResult<TItem> Ok(IEnumerable<TItem> items, int totalCount = -1, int limit = -1, int offset = -1) =>
+    public static ListResultOld<TItem> Ok(IEnumerable<TItem> items, int totalCount = -1, int limit = -1, int offset = -1) =>
         new(true, string.Empty, totalCount, items, limit, offset);
 
-    public new static ListResult<TItem> Failed(string message, Exception? exception = null) =>
+    public new static ListResultOld<TItem> Failed(string message, Exception? exception = null) =>
         new(false, message, -1, null, exception: exception);
 }

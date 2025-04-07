@@ -2,18 +2,18 @@ namespace DotBased.AspNet.Authority.EFCore.Repositories;
 
 public abstract class RepositoryBase
 {
-    protected Result<T> HandleExceptionResult<T>(string message, Exception ex) => new(HandleException(message, ex));
+    protected ResultOld<T> HandleExceptionResult<T>(string message, Exception ex) => new(HandleException(message, ex));
 
-    protected ListResult<T> HandleExceptionListResult<T>(string message, Exception ex) =>
+    protected ListResultOld<T> HandleExceptionListResult<T>(string message, Exception ex) =>
         new(HandleException(message, ex));
 
-    protected Result HandleException(string message, Exception ex)
+    protected ResultOld HandleException(string message, Exception ex)
     {
         if (ex is OperationCanceledException oce)
         {
-            return Result.Failed("Operation cancelled.", oce);
+            return ResultOld.Failed("Operation cancelled.", oce);
         }
 
-        return Result.Failed(message, ex);
+        return ResultOld.Failed(message, ex);
     }
 }

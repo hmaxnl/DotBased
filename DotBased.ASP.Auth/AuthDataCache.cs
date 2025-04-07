@@ -15,26 +15,26 @@ public class AuthDataCache
 
     private readonly AuthStateCacheCollection<AuthenticationStateModel, AuthenticationState> _authenticationStateCollection = [];
 
-    public Result PurgeSessionState(string id) => _authenticationStateCollection.Remove(id) ? Result.Ok() : Result.Failed("Failed to purge session state from cache! Or the session was not cached...");
+    public ResultOld PurgeSessionState(string id) => _authenticationStateCollection.Remove(id) ? ResultOld.Ok() : ResultOld.Failed("Failed to purge session state from cache! Or the session was not cached...");
 
     public void CacheSessionState(AuthenticationStateModel stateModel, AuthenticationState? state = null) => _authenticationStateCollection[stateModel.Id] =
         new AuthStateCacheNode<AuthenticationStateModel, AuthenticationState>(stateModel, state);
 
-    public Result<Tuple<AuthenticationStateModel, AuthenticationState?>> RequestSessionState(string id)
+    public ResultOld<Tuple<AuthenticationStateModel, AuthenticationState?>> RequestSessionState(string id)
     {
         if (!_authenticationStateCollection.TryGetValue(id, out var node))
-            return Result<Tuple<AuthenticationStateModel, AuthenticationState?>>.Failed("No cached object found!");
+            return ResultOld<Tuple<AuthenticationStateModel, AuthenticationState?>>.Failed("No cached object found!");
         string failedMsg;
         if (node.StateModel != null)
         {
             if (node.IsValidLifespan(_configuration.CachedAuthSessionLifespan))
-                return Result<Tuple<AuthenticationStateModel, AuthenticationState?>>.Ok(new Tuple<AuthenticationStateModel, AuthenticationState?>(node.StateModel, node.State));
+                return ResultOld<Tuple<AuthenticationStateModel, AuthenticationState?>>.Ok(new Tuple<AuthenticationStateModel, AuthenticationState?>(node.StateModel, node.State));
             failedMsg = $"Session has invalid lifespan, removing entry: [{id}] from cache!";
         }
         else
             failedMsg = $"Returned object is null, removing entry: [{id}] from cache!";
         _authenticationStateCollection.Remove(id);
-        return Result<Tuple<AuthenticationStateModel, AuthenticationState?>>.Failed(failedMsg);
+        return ResultOld<Tuple<AuthenticationStateModel, AuthenticationState?>>.Failed(failedMsg);
     }
 }
 

@@ -44,9 +44,9 @@ public partial class AuthorityManager
     public async Task<Result> AddRolesToUserAsync(List<AuthorityRole> roles, AuthorityUser user, CancellationToken cancellationToken = default)
     {
         var usrValidation = await IsValidUserAsync(user, cancellationToken);
-        if (!usrValidation.Success)
+        if (!usrValidation.IsSuccess)
         {
-            return ResultError.Fail("Validation for user failed!");
+            return usrValidation;
         }
         
         var linkedRoles = await RoleRepository.GetRolesFromLinkAsync(user.Id, roles, cancellationToken);
@@ -65,9 +65,9 @@ public partial class AuthorityManager
     public async Task<Result> RemoveRolesFromUserAsync(List<AuthorityRole> roles, AuthorityUser user, CancellationToken cancellationToken = default)
     {
         var usrValidation = await IsValidUserAsync(user, cancellationToken);
-        if (!usrValidation.Success)
+        if (!usrValidation.IsSuccess)
         {
-            return ResultError.Fail("Validation for user failed!");
+            return usrValidation;
         }
         
         var linkedRoles = await RoleRepository.GetRolesFromLinkAsync(user.Id, roles, cancellationToken);
@@ -95,20 +95,15 @@ public partial class AuthorityManager
         var linkResult = await RoleRepository.AddRolesLinkAsync(rolesToAdd, group.Id, cancellationToken);
         return linkResult ? Result.Success() : ResultError.Fail("Failed to add roles.");
     }
-
-    /// <summary>
-    /// Get all roles (including group roles) that the user has.
-    /// </summary>
-    /// <param name="user">The user to get the roles from</param>
-    /// <param name="cancellationToken"></param>
-    public async Task<Result<List<AuthorityRole>>> GetUserRolesAsync(AuthorityUser user, CancellationToken cancellationToken = default)
+    
+    public async Task<Result<List<AuthorityRole>>> GetAllUserRolesAsync(AuthorityUser user, CancellationToken cancellationToken = default)
     {
         try
         {
             var usrValidation = await IsValidUserAsync(user, cancellationToken);
-            if (!usrValidation.Success)
+            if (!usrValidation.IsSuccess)
             {
-                return ResultError.Fail("Invalid user");
+                return usrValidation.Error ?? ResultError.Fail("User validation failed.");
             }
 
             var searchIds = new List<Guid> { user.Id };

@@ -77,11 +77,8 @@ public class RoleRepository(IDbContextFactory<AuthorityContext> contextFactory, 
         context.RoleLinks.RemoveRange(context.RoleLinks.Where(rl => roleIds.Contains(rl.RoleId)));
         
         var removedRoles = await context.SaveChangesAsync(cancellationToken);
-        if (removedRoles == roles.Count)
-        {
-            return true;
-        }
-        logger.LogError("Failed to remove all roles, {removedRoles}/{totalRoles} roles removed!", removedRoles, roles.Count);
+        if (removedRoles != 0) return true;
+        logger.LogError("Failed to remove roles");
         return false;
     }
 
@@ -116,12 +113,8 @@ public class RoleRepository(IDbContextFactory<AuthorityContext> contextFactory, 
         var roleIds = roles.Select(r => r.Id).ToList();
         context.RoleLinks.RemoveRange(context.RoleLinks.Where(rg => rg.LinkId == linkId && roleIds.Contains(rg.RoleId)));
         var unlinkedRoles = await context.SaveChangesAsync(cancellationToken);
-        if (unlinkedRoles == roles.Count)
-        {
-            return true;
-        }
-
-        logger.LogError("Failed to remove all linked roles, {unlinkedRoles}/{totalRoles} roles unlinked!", unlinkedRoles, roles.Count);
+        if (unlinkedRoles != 0) return true;
+        logger.LogError("Failed to remove linked roles");
         return false;
     }
 

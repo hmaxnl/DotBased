@@ -32,10 +32,10 @@ public class ValidationResult : Result
 
     public static ValidationResult FromResult(Result result)
     {
-        var authorityResult = result.Match<ValidationResult>(
+        var validationResult = result.Match<ValidationResult>(
             () => new ValidationResult(),
             error => new ValidationResult(error));
-        return authorityResult;
+        return validationResult;
     }
 
     public new static ValidationResult Success() => new();

@@ -1,6 +1,7 @@
 using DotBased.AspNet.Authority.Managers;
 using DotBased.AspNet.Authority.Models.Authority;
 using DotBased.AspNet.Authority.Models.Validation;
+using DotBased.AspNet.Authority.Monads;
 
 namespace DotBased.AspNet.Authority.Validators;
 
@@ -17,6 +18,6 @@ public class PasswordEqualsValidator : IPasswordValidator
             errors.Add(new ValidationError(ValidatorId, $"{ValidationBase}.InUse", "User uses this password already!"));
         }
 
-        return errors.Count > 0 ? ValidationResult.Failed(errors) : ValidationResult.Ok();
+        return errors.Count > 0 ? ValidationResult.Fail(errors) : ValidationResult.Success();
     }
 }

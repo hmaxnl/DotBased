@@ -2,6 +2,7 @@ using DotBased.AspNet.Authority.Managers;
 using DotBased.AspNet.Authority.Models.Authority;
 using DotBased.AspNet.Authority.Models.Options;
 using DotBased.AspNet.Authority.Models.Validation;
+using ValidationResult = DotBased.AspNet.Authority.Monads.ValidationResult;
 
 namespace DotBased.AspNet.Authority.Validators;
 
@@ -53,7 +54,7 @@ public class UserValidator : IUserValidator
                     chars.AddRange(user.UserName.Where(userNameChar => userOptions.UserNameCharacters.Contains(userNameChar)));
                 }
 
-                if (chars.Count <= 0) return errors.Count > 0 ? ValidationResult.Failed(errors) : ValidationResult.Ok();
+                if (chars.Count <= 0) return errors.Count > 0 ? ValidationResult.Fail(errors) : ValidationResult.Success();
                 var errorCode = "";
                 var description = "";
                 switch (userOptions.UserNameCharacterListType)
@@ -76,6 +77,6 @@ public class UserValidator : IUserValidator
             errors.Add(new ValidationError(ValidatorId, $"{ValidationBase}.InvalidUserName", "No username given!"));
         }
 
-        return errors.Count > 0 ? ValidationResult.Failed(errors) : ValidationResult.Ok();
+        return errors.Count > 0 ? ValidationResult.Fail(errors) : ValidationResult.Success();
     }
 }

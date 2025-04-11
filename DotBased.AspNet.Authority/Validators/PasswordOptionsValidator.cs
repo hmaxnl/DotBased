@@ -1,6 +1,7 @@
 using DotBased.AspNet.Authority.Managers;
 using DotBased.AspNet.Authority.Models.Authority;
 using DotBased.AspNet.Authority.Models.Validation;
+using DotBased.AspNet.Authority.Monads;
 using DotBased.Extensions;
 
 namespace DotBased.AspNet.Authority.Validators;
@@ -57,7 +58,7 @@ public class PasswordOptionsValidator : IPasswordValidator
             errors.Add(new ValidationError(ValidatorId, $"{ValidationBase}.UniqueChars", $"Password must contain at least {passwordOptions.MinimalUniqueChars} unique chars."));
         }
 
-        return await Task.FromResult(errors.Count > 0 ? ValidationResult.Failed(errors) : ValidationResult.Ok());
+        return await Task.FromResult(errors.Count > 0 ? ValidationResult.Fail(errors) : ValidationResult.Success());
     }
 
     private bool ContainsDigit(string strVal) => strVal.Any(char.IsDigit);

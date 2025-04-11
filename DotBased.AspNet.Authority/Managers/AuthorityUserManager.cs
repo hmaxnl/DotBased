@@ -1,6 +1,7 @@
 using DotBased.AspNet.Authority.Models;
 using DotBased.AspNet.Authority.Models.Authority;
 using DotBased.AspNet.Authority.Models.Validation;
+using ValidationResult = DotBased.AspNet.Authority.Monads.ValidationResult;
 
 namespace DotBased.AspNet.Authority.Managers;
 
@@ -12,12 +13,12 @@ public partial class AuthorityManager
         foreach (var validator in PasswordValidators)
         {
             var validatorResult = await validator.ValidatePasswordAsync(this, user, password);
-            if (!validatorResult.Success)
+            if (!validatorResult.IsSuccess)
             {
-                errors.AddRange(validatorResult.Errors);
+                errors.AddRange(validatorResult.ValidationErrors);
             }
         }
-        return errors.Count > 0 ? ValidationResult.Failed(errors) : ValidationResult.Ok();
+        return errors.Count > 0 ? ValidationResult.Fail(errors) : ValidationResult.Success();
     }
 
     public async Task<ValidationResult> ValidateUserAsync(AuthorityUser user)
@@ -26,12 +27,12 @@ public partial class AuthorityManager
         foreach (var userValidator in UserValidators)
         {
             var validationResult = await userValidator.ValidateUserAsync(this, user);
-            if (!validationResult.Success)
+            if (!validationResult.IsSuccess)
             {
-                errors.AddRange(validationResult.Errors);
+                errors.AddRange(validationResult.ValidationErrors);
             }
         }
-        return errors.Count > 0 ? ValidationResult.Failed(errors) : ValidationResult.Ok();
+        return errors.Count > 0 ? ValidationResult.Fail(errors) : ValidationResult.Success();
     }
 
     public async Task<ListResultOld<AuthorityUserItem>> SearchUsersAsync(string query, int maxResults = 20, int offset = 0, CancellationToken cancellationToken = default)
@@ -43,9 +44,9 @@ public partial class AuthorityManager
     public async Task<AuthorityResultOldOld<AuthorityUser>> UpdatePasswordAsync(AuthorityUser user, string password, CancellationToken cancellationToken = default)
     {
         var passwordValidation = await ValidatePasswordAsync(user, password);
-        if (!passwordValidation.Success)
+        if (!passwordValidation.IsSuccess)
         {
-            return AuthorityResultOldOld<AuthorityUser>.Failed(passwordValidation.Errors, ResultFailReason.Validation);
+            return AuthorityResultOldOld<AuthorityUser>.Failed(passwordValidation.ValidationErrors, ResultFailReason.Validation);
         }
 
         user.PasswordHash = await PasswordHasher.HashPasswordAsync(password);
@@ -59,11 +60,11 @@ public partial class AuthorityManager
     {
         var userValidation = await ValidateUserAsync(userModel);
         var passwordValidation = await ValidatePasswordAsync(userModel, password);
-        if (!userValidation.Success || !passwordValidation.Success)
+        if (!userValidation.IsSuccess || !passwordValidation.IsSuccess)
         {
             List<ValidationError> errors = [];
-            errors.AddRange(userValidation.Errors);
-            errors.AddRange(passwordValidation.Errors);
+            errors.AddRange(userValidation.ValidationErrors);
+            errors.AddRange(passwordValidation.ValidationErrors);
             return AuthorityResultOldOld<AuthorityUser>.Failed(errors, ResultFailReason.Validation);
         }
         

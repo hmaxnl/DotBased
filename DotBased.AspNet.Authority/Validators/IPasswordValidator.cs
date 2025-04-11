@@ -1,6 +1,6 @@
 using DotBased.AspNet.Authority.Managers;
 using DotBased.AspNet.Authority.Models.Authority;
-using DotBased.AspNet.Authority.Models.Validation;
+using DotBased.AspNet.Authority.Monads;
 
 namespace DotBased.AspNet.Authority.Validators;
 

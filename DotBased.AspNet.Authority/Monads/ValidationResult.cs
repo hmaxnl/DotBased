@@ -3,9 +3,9 @@ using DotBased.Monads;
 
 namespace DotBased.AspNet.Authority.Monads;
 
-public class ValidationResult<T> : Result<T>
+public class ValidationResult : Result
 {
-    private ValidationResult(T result) : base(result)
+    private ValidationResult()
     {
     }
 
@@ -25,19 +25,19 @@ public class ValidationResult<T> : Result<T>
     private readonly List<ValidationError> _validationErrors = [];
     public IReadOnlyList<ValidationError> ValidationErrors => _validationErrors;
     
-    public static implicit operator ValidationResult<T>(T result) => new(result);
-    public static implicit operator ValidationResult<T>(Exception exception) => new(exception);
-    public static implicit operator ValidationResult<T>(ResultError error) => new(error);
-    public static implicit operator ValidationResult<T>(List<ValidationError> validationErrors) => new(validationErrors);
+    
+    public static implicit operator ValidationResult(Exception exception) => new(exception);
+    public static implicit operator ValidationResult(ResultError error) => new(error);
+    public static implicit operator ValidationResult(List<ValidationError> validationErrors) => new(validationErrors);
 
-    public static ValidationResult<T> FromResult(Result<T> result)
+    public static ValidationResult FromResult(Result result)
     {
-        var authorityResult = result.Match<ValidationResult<T>>(
-            r => new ValidationResult<T>(r),
-            error => new ValidationResult<T>(error));
+        var authorityResult = result.Match<ValidationResult>(
+            () => new ValidationResult(),
+            error => new ValidationResult(error));
         return authorityResult;
     }
 
-    public TMatch Match<TMatch>(Func<T, TMatch> success, Func<ResultError, IReadOnlyList<ValidationError>, TMatch> failure) =>
-        IsSuccess && Value != null ? success(Value) : failure(Error ?? ResultError.Fail("No error and value is null!"), ValidationErrors);
+    public new static ValidationResult Success() => new();
+    public static ValidationResult Fail(List<ValidationError> validationErrors) => new(validationErrors);
 }

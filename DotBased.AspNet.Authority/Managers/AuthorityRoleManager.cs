@@ -10,18 +10,28 @@ public partial class AuthorityManager
     {
         role.Version = GenerateVersion();
         var createResult = await RoleRepository.CreateRoleAsync(role, cancellationToken);
+        if (createResult == null)
+        {
+            return ResultError.Fail("Failed to create new role.");
+        }
+
         return createResult;
     }
 
     public async Task<Result> DeleteRolesAsync(List<AuthorityRole> roles, CancellationToken cancellationToken = default)
     {
-        var result = await RoleRepository.DeleteRolesAsync(roles, cancellationToken);
-        return result;
+        var success = await RoleRepository.DeleteRolesAsync(roles, cancellationToken);
+        return success ? Result.Success() : ResultError.Fail("Failed to delete roles.");
     }
 
     public async Task<Result<AuthorityRole>> UpdateRoleAsync(AuthorityRole role, CancellationToken cancellationToken = default)
     {
         var result = await RoleRepository.UpdateRoleAsync(role, cancellationToken);
+        if (result == null)
+        {
+            return ResultError.Fail("Failed to update role.");
+        }
+
         return result;
     }
 
@@ -31,81 +41,59 @@ public partial class AuthorityManager
         return searchResult;
     }
 
-    public async Task AddRolesToUserAsync(List<AuthorityRole> roles, AuthorityUser user, CancellationToken cancellationToken = default)
+    public async Task<Result> AddRolesToUserAsync(List<AuthorityRole> roles, AuthorityUser user, CancellationToken cancellationToken = default)
     {
         var usrValidation = await IsValidUserAsync(user, cancellationToken);
         if (!usrValidation.Success)
         {
-            _logger.Error(usrValidation.Exception ?? new Exception("Validation for user failed!"), "Invalid user!");
-            return;
+            return ResultError.Fail("Validation for user failed!");
         }
         
-        var checkResult = await RoleRepository.HasRolesAsync(user.Id, roles, cancellationToken);
-        var hasRolesList = checkResult.Match<List<Guid>>(success: v => v, (_) => []);
+        var linkedRoles = await RoleRepository.GetRolesFromLinkAsync(user.Id, roles, cancellationToken);
 
         var rolesToAdd = roles;
-        if (hasRolesList.Count != 0)
+        if (linkedRoles.Count != 0)
         {
-            rolesToAdd = roles.Where(r => !hasRolesList.Contains(r.Id)).ToList();
+            rolesToAdd = roles.Where(r => !linkedRoles.Contains(r.Id)).ToList();
         }
 
-        var addResult = await RoleRepository.AddRolesLinkAsync(rolesToAdd, user.Id, cancellationToken);
-        addResult.Match(() =>
-        {
-            _logger.Debug("Role links successfully added!");
-        }, e =>
-        {
-            _logger.Error(e.Exception ?? new Exception("Match failed!"), e.Description);
-        });
+        var addSuccess = await RoleRepository.AddRolesLinkAsync(rolesToAdd, user.Id, cancellationToken);
+        
+        return addSuccess ? Result.Success() : ResultError.Fail("Failed to add roles.");
     }
 
-    public async Task RemoveRolesFromUserAsync(List<AuthorityRole> roles, AuthorityUser user, CancellationToken cancellationToken = default)
+    public async Task<Result> RemoveRolesFromUserAsync(List<AuthorityRole> roles, AuthorityUser user, CancellationToken cancellationToken = default)
     {
         var usrValidation = await IsValidUserAsync(user, cancellationToken);
         if (!usrValidation.Success)
         {
-            _logger.Error(usrValidation.Exception ?? new Exception("Validation for user failed!"), "Invalid user!");
-            return;
+            return ResultError.Fail("Validation for user failed!");
         }
         
-        var checkResult = await RoleRepository.HasRolesAsync(user.Id, roles, cancellationToken);
-        var hasRolesList = checkResult.Match<List<Guid>>(success: v => v, (_) => []);
+        var linkedRoles = await RoleRepository.GetRolesFromLinkAsync(user.Id, roles, cancellationToken);
 
         var rolesToRemove = roles;
-        if (hasRolesList.Count != 0)
+        if (linkedRoles.Count != 0)
         {
-            rolesToRemove = roles.Where(r => !hasRolesList.Contains(r.Id)).ToList();
+            rolesToRemove = roles.Where(r => !linkedRoles.Contains(r.Id)).ToList();
         }
         
-        var removeResult = await RoleRepository.DeleteRolesLinkAsync(rolesToRemove, user.Id, cancellationToken);
-        removeResult.Match(() =>
-        {
-            _logger.Debug("Removed roles from user!");
-        }, e =>
-        {
-            _logger.Error(e.Exception ?? new Exception("Removing roles from user failed!"), e.Description);
-        });
+        var removeResult = await RoleRepository.UnlinkRolesAsync(rolesToRemove, user.Id, cancellationToken);
+        return removeResult ? Result.Success() : ResultError.Fail("Failed to remove roles.");
     }
 
-    public async Task AddRolesToGroupAsync(List<AuthorityRole> roles, AuthorityGroup group, CancellationToken cancellationToken = default)
+    public async Task<Result> AddRolesToGroupAsync(List<AuthorityRole> roles, AuthorityGroup group, CancellationToken cancellationToken = default)
     {
-        var checkResult = await RoleRepository.HasRolesAsync(group.Id, roles, cancellationToken);
-        var hasRolesList = checkResult.Match<List<Guid>>(success: v => v, (_) => []);
+        var linkedRoles = await RoleRepository.GetRolesFromLinkAsync(group.Id, roles, cancellationToken);
         
         var rolesToAdd = roles;
-        if (hasRolesList.Count != 0)
+        if (linkedRoles.Count != 0)
         {
-            rolesToAdd = roles.Where(r => !hasRolesList.Contains(r.Id)).ToList();
+            rolesToAdd = roles.Where(r => !linkedRoles.Contains(r.Id)).ToList();
         }
         
-        var addResult = await RoleRepository.AddRolesLinkAsync(rolesToAdd, group.Id, cancellationToken);
-        addResult.Match(() =>
-        {
-            _logger.Debug("Added roles to group.");
-        }, e =>
-        {
-            _logger.Error(e.Exception ?? new Exception("Adding roles to group failed!"), e.Description);
-        });
+        var linkResult = await RoleRepository.AddRolesLinkAsync(rolesToAdd, group.Id, cancellationToken);
+        return linkResult ? Result.Success() : ResultError.Fail("Failed to add roles.");
     }
 
     /// <summary>
@@ -115,35 +103,41 @@ public partial class AuthorityManager
     /// <param name="cancellationToken"></param>
     public async Task<Result<List<AuthorityRole>>> GetUserRolesAsync(AuthorityUser user, CancellationToken cancellationToken = default)
     {
-        var usrValidation = await IsValidUserAsync(user, cancellationToken);
-        if (!usrValidation.Success)
+        try
         {
-            return ResultError.Fail("Invalid user");
+            var usrValidation = await IsValidUserAsync(user, cancellationToken);
+            if (!usrValidation.Success)
+            {
+                return ResultError.Fail("Invalid user");
+            }
+
+            var searchIds = new List<Guid> { user.Id };
+
+            var usrGroups = await GetUserGroupsAsync(user, cancellationToken);
+            if (usrGroups.Success)
+            {
+                searchIds.AddRange(usrGroups.Items.Select(g => g.Id).ToList());
+            }
+
+            var linkedRolesResult = await RoleRepository.GetLinkedRolesAsync(searchIds, cancellationToken);
+            return linkedRolesResult;
         }
-        
-        var searchIds = new List<Guid> { user.Id };
-        
-        var usrGroups = await GetUserGroupsAsync(user, cancellationToken);
-        if (usrGroups.Success)
+        catch (Exception e)
         {
-            searchIds.AddRange(usrGroups.Items.Select(g => g.Id).ToList());
+            return e;
         }
-        
-        var linkedRolesResult = await RoleRepository.GetLinkedRolesAsync(searchIds, cancellationToken);
-        return linkedRolesResult.Match<List<AuthorityRole>>(roles => roles, e =>
-        {
-            _logger.Error(e.Exception ?? new Exception("Failed to get user roles!"), e.Description);
-            return [];
-        });
     }
 
     public async Task<Result<List<AuthorityRole>>> GetGroupRolesAsync(List<Guid> groupIds, CancellationToken cancellationToken = default)
     {
-        var linkedRolesResult = await RoleRepository.GetLinkedRolesAsync(groupIds, cancellationToken);
-        return linkedRolesResult.Match<List<AuthorityRole>>(roles => roles, e =>
+        try
         {
-            _logger.Error(e.Exception ?? new Exception("Failed to get group roles!"), e.Description);
-            return [];
-        });
+            var linkedRolesResult = await RoleRepository.GetLinkedRolesAsync(groupIds, cancellationToken);
+            return linkedRolesResult;
+        }
+        catch (Exception e)
+        {
+            return e;
+        }
     }
 }

@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using DotBased.Monads;
 
 namespace DotBased.Utilities;
 
@@ -7,12 +8,12 @@ public static class Cryptography
     /*
      * https://gist.github.com/therightstuff/aa65356e95f8d0aae888e9f61aa29414
      */
-    public static ResultOld<string> ExportPublicKeyToPem(RSACryptoServiceProvider csp)
+    public static Result<string> ExportPublicKeyToPem(RSACryptoServiceProvider csp)
     {
         var outputStream = new StringWriter();
         var parameters = csp.ExportParameters(false);
         if (parameters.Exponent == null || parameters.Modulus == null)
-            return ResultOld<string>.Failed("RSAParameters are empty!");
+            return ResultError.Fail("RSAParameters are empty!");
         using (var stream = new MemoryStream())
         {
             var writer = new BinaryWriter(stream);
@@ -23,7 +24,7 @@ public static class Cryptography
                 innerWriter.Write((byte)0x30); // SEQUENCE
                 EncodeLength(innerWriter, 13);
                 innerWriter.Write((byte)0x06); // OBJECT IDENTIFIER
-                byte[] rsaEncryptionOid = new byte[] { 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x01, 0x01 };
+                var rsaEncryptionOid = new byte[] { 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x01, 0x01 };
                 EncodeLength(innerWriter, rsaEncryptionOid.Length);
                 innerWriter.Write(rsaEncryptionOid);
                 innerWriter.Write((byte)0x05); // NULL
@@ -44,20 +45,20 @@ public static class Cryptography
                         bitStringWriter.Write(paramsStream.GetBuffer(), 0, paramsLength);
                     }
 
-                    int bitStringLength = (int)bitStringStream.Length;
+                    var bitStringLength = (int)bitStringStream.Length;
                     EncodeLength(innerWriter, bitStringLength);
                     innerWriter.Write(bitStringStream.GetBuffer(), 0, bitStringLength);
                 }
 
-                int length = (int)innerStream.Length;
+                var length = (int)innerStream.Length;
                 EncodeLength(writer, length);
                 writer.Write(innerStream.GetBuffer(), 0, length);
             }
 
-            char[] base64 = Convert.ToBase64String(stream.GetBuffer(), 0, (int)stream.Length).ToCharArray();
+            var base64 = Convert.ToBase64String(stream.GetBuffer(), 0, (int)stream.Length).ToCharArray();
             // WriteLine terminates with \r\n, we want only \n
             outputStream.Write("-----BEGIN PUBLIC KEY-----\n");
-            for (int i = 0; i < base64.Length; i += 64)
+            for (var i = 0; i < base64.Length; i += 64)
             {
                 outputStream.Write(base64, i, Math.Min(64, base64.Length - i));
                 outputStream.Write("\n");
@@ -66,7 +67,7 @@ public static class Cryptography
             outputStream.Write("-----END PUBLIC KEY-----");
         }
 
-        return ResultOld<string>.Ok(outputStream.ToString());
+        return outputStream.ToString();
     }
         
     private static void EncodeLength(BinaryWriter stream, int length)
@@ -82,15 +83,15 @@ public static class Cryptography
             default:
             {
                 // Long form
-                int temp = length;
-                int bytesRequired = 0;
+                var temp = length;
+                var bytesRequired = 0;
                 while (temp > 0)
                 {
                     temp >>= 8;
                     bytesRequired++;
                 }
                 stream.Write((byte)(bytesRequired | 0x80));
-                for (int i = bytesRequired - 1; i >= 0; i--)
+                for (var i = bytesRequired - 1; i >= 0; i--)
                 {
                     stream.Write((byte)(length >> (8 * i) & 0xff));
                 }
@@ -102,7 +103,7 @@ public static class Cryptography
     private static void EncodeIntegerBigEndian(BinaryWriter stream, byte[] value, bool forceUnsigned = true)
     {
         stream.Write((byte)0x02); // INTEGER
-        int prefixZeros = value.TakeWhile(t => t == 0).Count();
+        var prefixZeros = value.TakeWhile(t => t == 0).Count();
         if (value.Length - prefixZeros == 0)
         {
             EncodeLength(stream, 1);
@@ -120,7 +121,7 @@ public static class Cryptography
             {
                 EncodeLength(stream, value.Length - prefixZeros);
             }
-            for (int i = prefixZeros; i < value.Length; i++)
+            for (var i = prefixZeros; i < value.Length; i++)
             {
                 stream.Write(value[i]);
             }

@@ -1,130 +1,94 @@
+using DotBased.AspNet.Authority.Models;
 using DotBased.AspNet.Authority.Models.Authority;
 using DotBased.AspNet.Authority.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace DotBased.AspNet.Authority.EFCore.Repositories;
 
-public class GroupRepository(IDbContextFactory<AuthorityContext> contextFactory) : RepositoryBase, IGroupRepository
+public class GroupRepository(IDbContextFactory<AuthorityContext> contextFactory, ILogger<GroupRepository> logger) : RepositoryBase, IGroupRepository
 {
-    public async Task<ListResultOld<AuthorityGroupItem>> GetGroupsAsync(int limit = 20, int offset = 0, string search = "", CancellationToken cancellationToken = default)
+    public async Task<QueryItems<AuthorityGroupItem>> GetGroupsAsync(int limit = 20, int offset = 0, string search = "", CancellationToken cancellationToken = default)
     {
-        try
+        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var query = context.Groups.AsQueryable();
+        if (!string.IsNullOrWhiteSpace(search))
         {
-            await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
-            var query = context.Groups.AsQueryable();
-            if (!string.IsNullOrWhiteSpace(search))
-            {
-                query = query.Where(g => $"{g.Name} {g.Id}".Contains(search));
-            }
-            var total = await query.CountAsync(cancellationToken);
-            var select = await query.OrderBy(g => g.Name).Skip(offset).Take(limit).Select(g => new AuthorityGroupItem()
-            {
-                Id = g.Id,
-                Name = g.Name
-            }).ToListAsync(cancellationToken);
-            return ListResultOld<AuthorityGroupItem>.Ok(select, total, limit, offset);
+            query = query.Where(g => $"{g.Name} {g.Id}".Contains(search));
         }
-        catch (Exception e)
+        var total = await query.CountAsync(cancellationToken);
+        var select = await query.OrderBy(g => g.Name).Skip(offset).Take(limit).Select(g => new AuthorityGroupItem()
         {
-            return HandleExceptionListResult<AuthorityGroupItem>("Failed to get Groups", e);
-        }
+            Id = g.Id,
+            Name = g.Name
+        }).ToListAsync(cancellationToken);
+        return QueryItems<AuthorityGroupItem>.Create(select, total, limit, offset);
     }
 
-    public async Task<ResultOld<AuthorityGroup>> GetGroupByIdAsync(string id, CancellationToken cancellationToken = default)
+    public async Task<AuthorityGroup?> GetGroupByIdAsync(string id, CancellationToken cancellationToken = default)
     {
-        try
+        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        
+        if (!Guid.TryParse(id, out var groupId))
         {
-            await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
-            if (!Guid.TryParse(id, out var groupId))
-            {
-                return ResultOld<AuthorityGroup>.Failed("Invalid group id");
-            }
-            var group = await context.Groups.Where(g => g.Id == groupId).Include(g => g.Attributes).FirstOrDefaultAsync(cancellationToken: cancellationToken);
-            return ResultOld<AuthorityGroup>.HandleResult(group, "Group not found");
+            throw new Exception($"Invalid group id: {id}");
         }
-        catch (Exception e)
-        {
-            return HandleExceptionResult<AuthorityGroup>("Failed to get Group", e);
-        }
+        
+        return await context.Groups.Where(g => g.Id == groupId).Include(g => g.Attributes).FirstOrDefaultAsync(cancellationToken: cancellationToken);
     }
 
-    public async Task<ListResultOld<AuthorityGroup>> GetUserGroupsAsync(AuthorityUser user, CancellationToken cancellationToken = default)
+    public async Task<List<AuthorityGroup>> GetUserGroupsAsync(AuthorityUser user, CancellationToken cancellationToken = default)
     {
-        try
-        {
-            await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
-            var userJoinGroups = context.UserGroups.Where(ug => ug.UserId == user.Id).Select(ug => ug.GroupId);
-            var userGroups = context.Groups.Where(g => userJoinGroups.Contains(g.Id));
-            return ListResultOld<AuthorityGroup>.Ok(userGroups, userGroups.Count());
-        }
-        catch (Exception e)
-        {
-            return HandleExceptionListResult<AuthorityGroup>("Failed to get Groups", e);
-        }
+        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var userJoinGroups = context.UserGroups.Where(ug => ug.UserId == user.Id).Select(ug => ug.GroupId);
+        var userGroups = context.Groups.Where(g => userJoinGroups.Contains(g.Id));
+        return userGroups.ToList();
     }
 
-    public async Task<ResultOld<AuthorityGroup>> CreateGroupAsync(AuthorityGroup group, CancellationToken cancellationToken = default)
+    public async Task<AuthorityGroup?> CreateGroupAsync(AuthorityGroup group, CancellationToken cancellationToken = default)
     {
-        try
+        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        if (group.Id == Guid.Empty)
         {
-            await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
-            if (group.Id == Guid.Empty)
-            {
-                return ResultOld<AuthorityGroup>.Failed("Id cannot be empty.");
-            }
-            var entry = context.Groups.Add(group);
-            var saveResult = await context.SaveChangesAsync(cancellationToken);
-            return saveResult <= 0 ? ResultOld<AuthorityGroup>.Failed("Failed to create group.") : ResultOld<AuthorityGroup>.Ok(entry.Entity);
+            throw new Exception($"Invalid group id: {group.Id}");
         }
-        catch (Exception e)
-        {
-            return HandleExceptionResult<AuthorityGroup>("Failed to create group!", e);
-        }
+        var entry = context.Groups.Add(group);
+        var saveResult = await context.SaveChangesAsync(cancellationToken);
+        return saveResult != 0 ? entry.Entity : null;
     }
 
-    public async Task<ResultOld<AuthorityGroup>> UpdateGroupAsync(AuthorityGroup group, CancellationToken cancellationToken = default)
+    public async Task<AuthorityGroup?> UpdateGroupAsync(AuthorityGroup group, CancellationToken cancellationToken = default)
     {
-        try
+        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var currentGroup = await context.Groups.FirstOrDefaultAsync(g => g.Id == group.Id ,cancellationToken);
+        if (currentGroup == null)
         {
-            await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
-            var currentGroup = await context.Groups.FirstOrDefaultAsync(g => g.Id == group.Id ,cancellationToken);
-            if (currentGroup == null)
-            {
-                return ResultOld<AuthorityGroup>.Failed("Group not found.");
-            }
+            logger.LogError("Group with id {groupId} not found.", group.Id);
+            return null;
+        }
 
-            if (currentGroup.Version != group.Version)
-            {
-                return ResultOld<AuthorityGroup>.Failed("Group version does not match, version validation failed!");
-            }
+        if (currentGroup.Version != group.Version)
+        {
+            logger.LogError("Group version validation failed.");
+            return null;
+        }
             
-            var entry = context.Groups.Update(group);
-            var saveResult = await context.SaveChangesAsync(cancellationToken);
-            return saveResult <= 0 ? ResultOld<AuthorityGroup>.Failed("Failed to update group.") : ResultOld<AuthorityGroup>.Ok(entry.Entity);
-        }
-        catch (Exception e)
-        {
-            return HandleExceptionResult<AuthorityGroup>("Failed to update group!", e);
-        }
+        var entry = context.Groups.Update(group);
+        var saveResult = await context.SaveChangesAsync(cancellationToken);
+        return saveResult != 0 ? entry.Entity : null;
     }
 
-    public async Task<ResultOld> DeleteGroupAsync(AuthorityGroup group, CancellationToken cancellationToken = default)
+    public async Task<bool> DeleteGroupAsync(AuthorityGroup group, CancellationToken cancellationToken = default)
     {
-        try
+        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var currentGroup = await context.Groups.FirstOrDefaultAsync(g => g.Id == group.Id, cancellationToken);
+        if (currentGroup == null)
         {
-            await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
-            var currentGroup = await context.Groups.FirstOrDefaultAsync(g => g.Id == group.Id, cancellationToken);
-            if (currentGroup == null)
-            {
-                return ResultOld.Failed("Group not found, cannot delete group!");
-            }
-            context.Groups.Remove(currentGroup);
-            var saveResult = await context.SaveChangesAsync(cancellationToken);
-            return saveResult <= 0 ? ResultOld.Failed("Failed to delete group.") : ResultOld.Ok();
+            logger.LogError("Group with id {groupId} not found.", group.Id);
+            return false;
         }
-        catch (Exception e)
-        {
-            return HandleException("Failed to delete group!", e);
-        }
+        context.Groups.Remove(currentGroup);
+        var saveResult = await context.SaveChangesAsync(cancellationToken);
+        return saveResult != 0;
     }
 }

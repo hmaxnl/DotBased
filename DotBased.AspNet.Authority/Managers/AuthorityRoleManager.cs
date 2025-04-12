@@ -109,9 +109,9 @@ public partial class AuthorityManager
             var searchIds = new List<Guid> { user.Id };
 
             var usrGroups = await GetUserGroupsAsync(user, cancellationToken);
-            if (usrGroups.Success)
+            if (usrGroups.IsSuccess)
             {
-                searchIds.AddRange(usrGroups.Items.Select(g => g.Id).ToList());
+                searchIds.AddRange(usrGroups.Value.Select(g => g.Id).ToList());
             }
 
             var linkedRolesResult = await RoleRepository.GetLinkedRolesAsync(searchIds, cancellationToken);

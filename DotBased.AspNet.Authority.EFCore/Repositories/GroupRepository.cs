@@ -1,3 +1,4 @@
+using DotBased.AspNet.Authority.EFCore.Models;
 using DotBased.AspNet.Authority.Models;
 using DotBased.AspNet.Authority.Models.Authority;
 using DotBased.AspNet.Authority.Repositories;
@@ -37,6 +38,28 @@ public class GroupRepository(IDbContextFactory<AuthorityContext> contextFactory,
         return await context.Groups.Where(g => g.Id == groupId).Include(g => g.Attributes).FirstOrDefaultAsync(cancellationToken: cancellationToken);
     }
 
+    public async Task<bool> AddUsersToGroupAsync(List<AuthorityUser> users, AuthorityGroup group, CancellationToken cancellationToken = default)
+    {
+        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        if (!context.Groups.Any(g => g.Id == group.Id))
+        {
+            return false;
+        }
+        
+        var usersToAdd = users.Where(u => !context.UserGroups.Any(ug => ug.UserId == u.Id)).ToList();
+        if (usersToAdd.Count == 0)
+        {
+            return false;
+        }
+
+        foreach (var user in usersToAdd)
+        {
+            context.UserGroups.Add(new UserGroups() { UserId = user.Id, GroupId = group.Id });
+        }
+        var saveResult = await context.SaveChangesAsync(cancellationToken);
+        return saveResult > 0;
+    }
+
     public async Task<List<AuthorityGroup>> GetUserGroupsAsync(AuthorityUser user, CancellationToken cancellationToken = default)
     {
         await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
@@ -72,22 +95,21 @@ public class GroupRepository(IDbContextFactory<AuthorityContext> contextFactory,
             logger.LogError("Group version validation failed.");
             return null;
         }
-            
+        
         var entry = context.Groups.Update(group);
         var saveResult = await context.SaveChangesAsync(cancellationToken);
         return saveResult != 0 ? entry.Entity : null;
     }
 
-    public async Task<bool> DeleteGroupAsync(AuthorityGroup group, CancellationToken cancellationToken = default)
+    public async Task<bool> DeleteGroupsAsync(List<AuthorityGroup> groups, CancellationToken cancellationToken = default)
     {
         await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
-        var currentGroup = await context.Groups.FirstOrDefaultAsync(g => g.Id == group.Id, cancellationToken);
-        if (currentGroup == null)
-        {
-            logger.LogError("Group with id {groupId} not found.", group.Id);
-            return false;
-        }
-        context.Groups.Remove(currentGroup);
+        var groupIds = groups.Select(g => g.Id).ToList();
+        
+        context.Groups.RemoveRange(groups);
+        context.UserGroups.RemoveRange(context.UserGroups.Where(ug => groupIds.Contains(ug.GroupId)));
+        context.RoleLinks.RemoveRange(context.RoleLinks.Where(rl => groupIds.Contains(rl.LinkId)));
+        
         var saveResult = await context.SaveChangesAsync(cancellationToken);
         return saveResult != 0;
     }

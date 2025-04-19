@@ -5,8 +5,8 @@ namespace DotBased.AspNet.Authority.Repositories;
 
 public interface IUserRepository
 {
-    public Task<QueryItems<AuthorityUserItem>> GetAuthorityUsersAsync(int limit = 20, int offset = 0, string search = "", CancellationToken cancellationToken = default);
-    public Task<AuthorityUser?> GetAuthorityUserByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    public Task<QueryItems<AuthorityUserItem>> GetUsersAsync(int limit = 20, int offset = 0, string search = "", CancellationToken cancellationToken = default);
+    public Task<AuthorityUser?> GetUserByIdAsync(Guid id, CancellationToken cancellationToken = default);
     public Task<AuthorityUser?> CreateUserAsync(AuthorityUser user, CancellationToken cancellationToken = default);
     public Task<AuthorityUser?> UpdateUserAsync(AuthorityUser user, CancellationToken cancellationToken = default);
     public Task<bool> DeleteUsersAsync(List<AuthorityUser> users, CancellationToken cancellationToken = default);

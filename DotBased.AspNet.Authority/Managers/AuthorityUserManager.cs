@@ -38,7 +38,7 @@ public partial class AuthorityManager
 
     public async Task<Result<QueryItems<AuthorityUserItem>>> SearchUsersAsync(string query, int maxResults = 20, int offset = 0, CancellationToken cancellationToken = default)
     {
-        var result = await UserRepository.GetAuthorityUsersAsync(maxResults, offset, query, cancellationToken);
+        var result = await UserRepository.GetUsersAsync(maxResults, offset, query, cancellationToken);
         return result;
     }
 

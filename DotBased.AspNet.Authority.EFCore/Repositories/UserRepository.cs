@@ -8,7 +8,7 @@ namespace DotBased.AspNet.Authority.EFCore.Repositories;
 
 public class UserRepository(IDbContextFactory<AuthorityContext> contextFactory, ILogger<UserRepository> logger) : RepositoryBase, IUserRepository
 {
-    public async Task<QueryItems<AuthorityUserItem>> GetAuthorityUsersAsync(int limit = 20, int offset = 0, string search = "", CancellationToken cancellationToken = default)
+    public async Task<QueryItems<AuthorityUserItem>> GetUsersAsync(int limit = 20, int offset = 0, string search = "", CancellationToken cancellationToken = default)
     {
         await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         var query = context.Users.AsQueryable();
@@ -29,7 +29,7 @@ public class UserRepository(IDbContextFactory<AuthorityContext> contextFactory, 
         return QueryItems<AuthorityUserItem>.Create(selected, totalCount, limit, offset);
     }
 
-    public async Task<AuthorityUser?> GetAuthorityUserByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<AuthorityUser?> GetUserByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         if (id == Guid.Empty)

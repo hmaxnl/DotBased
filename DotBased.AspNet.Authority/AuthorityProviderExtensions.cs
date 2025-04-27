@@ -41,10 +41,7 @@ public static class AuthorityProviderExtensions
         builder.Services.Configure(configureOptions);
 
         builder.Services.AddScoped<IAuthenticationService, AuthorityAuthenticationService>();
-        var authBuilder = builder.Services.AddAuthentication(options =>
-        {
-            
-        });
+        var authBuilder = builder.Services.AddAuthentication();
         return authBuilder;
     }
 

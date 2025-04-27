@@ -7,13 +7,13 @@ namespace DotBased.AspNet.Authority.EFCore;
 
 public static class Extensions
 {
-    public static IServiceCollection AddAuthorityContext(this IServiceCollection services, Action<DbContextOptionsBuilder> options)
+    public static AuthorityBuilder AddAuthorityContext(this AuthorityBuilder builder, Action<DbContextOptionsBuilder> options)
     {
-        services.AddDbContextFactory<AuthorityContext>(options);
-        services.AddScoped<IAttributeRepository, AttributeRepository>();
-        services.AddScoped<IGroupRepository, GroupRepository>();
-        services.AddScoped<IRoleRepository, RoleRepository>();
-        services.AddScoped<IUserRepository, UserRepository>();
-        return services;
+        builder.Services.AddDbContextFactory<AuthorityContext>(options);
+        builder.Services.AddScoped<IAttributeRepository, AttributeRepository>();
+        builder.Services.AddScoped<IGroupRepository, GroupRepository>();
+        builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+        builder.Services.AddScoped<IUserRepository, UserRepository>();
+        return builder;
     }
 }

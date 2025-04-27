@@ -1,7 +1,10 @@
 using DotBased.AspNet.Authority.Crypto;
 using DotBased.AspNet.Authority.Managers;
 using DotBased.AspNet.Authority.Models.Options;
+using DotBased.AspNet.Authority.Models.Options.Auth;
+using DotBased.AspNet.Authority.Services;
 using DotBased.AspNet.Authority.Validators;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -9,13 +12,13 @@ namespace DotBased.AspNet.Authority;
 
 public static class AuthorityProviderExtensions
 {
-    public static AuthorityBuilder AddAuthority(this IServiceCollection services, Action<AuthorityOptions>? optionsAction = null)
+    public static AuthorityBuilder AddAuthority(this IServiceCollection services) => AddAuthority(services, _ => { });
+
+    public static AuthorityBuilder AddAuthority(this IServiceCollection services, Action<AuthorityOptions> optionsAction)
     {
-        if (optionsAction != null)
-        {
-            services.AddOptions();
-            services.Configure<AuthorityOptions>(optionsAction);
-        }
+        services.AddOptions();
+        ArgumentNullException.ThrowIfNull(optionsAction);
+        services.Configure(optionsAction);
         
         services.TryAddScoped<ICryptographer, Cryptographer>();
         services.TryAddScoped<IPasswordHasher, PasswordHasher>();
@@ -26,7 +29,47 @@ public static class AuthorityProviderExtensions
         services.TryAddScoped<IPhoneNumberVerifier, PhoneNumberVerifier>();
         services.TryAddScoped<IUserVerifier, UserVerifier>();*/
         services.TryAddScoped<AuthorityManager>();
+        
         return new AuthorityBuilder(services);
+    }
+
+    public static AuthenticationBuilder AddAuthorityAuth(this AuthorityBuilder builder) => AddAuthorityAuth(builder, _ => { });
+
+    public static AuthenticationBuilder AddAuthorityAuth(this AuthorityBuilder builder, Action<AuthorityAuthenticationOptions> configureOptions)
+    {
+        ArgumentNullException.ThrowIfNull(configureOptions);
+        builder.Services.Configure(configureOptions);
+
+        builder.Services.AddScoped<IAuthenticationService, AuthorityAuthenticationService>();
+        var authBuilder = builder.Services.AddAuthentication(options =>
+        {
+            
+        });
+        return authBuilder;
+    }
+
+    public static AuthenticationBuilder AddAuthorityCookie(this AuthenticationBuilder builder, string scheme = AuthorityDefaults.Scheme.Cookie.Default)
+    {
+        builder.AddCookie(options =>
+        {
+            options.Cookie.Name = AuthorityDefaults.Scheme.Cookie.CookieName;
+            options.Cookie.Path = AuthorityDefaults.Paths.Default;
+            options.Cookie.Expiration = TimeSpan.FromDays(1);
+            options.Cookie.HttpOnly = true;
+            options.Cookie.IsEssential = true;
+            options.LoginPath = AuthorityDefaults.Paths.Login;
+            options.LogoutPath = AuthorityDefaults.Paths.Logout;
+            options.AccessDeniedPath = AuthorityDefaults.Paths.Forbidden;
+            options.SlidingExpiration = true;
+            //options.SessionStore
+        });
+        return builder;
+    }
+
+    public static AuthenticationBuilder AddAuthorityToken(this AuthenticationBuilder builder, string scheme = AuthorityDefaults.Scheme.Token.Default)
+    {
+        
+        return builder;
     }
 
     public static AuthorityBuilder AddAuthorityRepository<TRepository>(this AuthorityBuilder authorityBuilder) where TRepository : class
@@ -37,21 +80,5 @@ public static class AuthorityProviderExtensions
     public static AuthorityBuilder MapAuthorityEndpoints(this AuthorityBuilder builder)
     {
         return builder;
-    }
-
-    private static Type GetBaseGenericArgumentType<TModel>(Type baseType)
-    {
-        var userGenericBaseTypeDefinition = typeof(TModel).BaseType?.GetGenericTypeDefinition();
-        if (userGenericBaseTypeDefinition != null && userGenericBaseTypeDefinition == baseType)
-        {
-            var userBaseGenericArguments = userGenericBaseTypeDefinition.GetGenericArguments();
-            if (userBaseGenericArguments.Length <= 0)
-            {
-                throw new ArgumentException("Base implementation does not have the required generic argument.", nameof(TModel));
-            }
-
-            return userBaseGenericArguments[0];
-        }
-        throw new ArgumentException($"Given object {typeof(TModel).Name} does not have the base implementation type of: {baseType.Name}", nameof(TModel));
     }
 }

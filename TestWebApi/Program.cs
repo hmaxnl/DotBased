@@ -21,20 +21,15 @@ LogService.AddLogAdapter(new BasedSerilogAdapter(serilogLogger));
 
 builder.Logging.ClearProviders();
 builder.Logging.AddDotBasedLoggerProvider(LogService.Options);
-builder.Services.AddAuthorityContext(options =>
-{
-    options.UseSqlite("Data Source=dev-dotbased.db", c => c.MigrationsAssembly("TestWebApi"));
-});
-builder.Services.AddAuthority(options =>
-{
-    
-});
 
-/*builder.Services.AddAuthentication(options =>
+builder.Services.AddControllers();
+
+builder.Services.AddAuthority().AddAuthorityContext(options =>
 {
-    options.DefaultScheme = BasedAuthenticationDefaults.BasedAuthenticationScheme;
-    options.DefaultChallengeScheme = BasedAuthenticationDefaults.BasedAuthenticationScheme;
-}).AddCookie();*/
+    options.UseSqlite("Data Source=dev-authority.db", c => c.MigrationsAssembly("TestWebApi"));
+}).AddAuthorityAuth()
+.AddAuthorityCookie()
+.AddAuthorityToken();
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -53,28 +48,13 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.MapControllers();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-    {
-        var forecast = Enumerable.Range(1, 5).Select(index =>
-                new WeatherForecast
-                (
-                    DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                    Random.Shared.Next(-20, 55),
-                    summaries[Random.Shared.Next(summaries.Length)]
-                ))
-            .ToArray();
-        return forecast;
-    })
-    .WithName("GetWeatherForecast")
-    .WithOpenApi();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.Run();
+return;
 
 ILogger SetupSerilog()
 {
@@ -84,7 +64,7 @@ ILogger SetupSerilog()
     return logConfig.CreateLogger();
 }
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
+public record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
     public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 }

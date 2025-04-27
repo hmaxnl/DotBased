@@ -17,11 +17,14 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Models\Data\" />
       <Folder Include="Models\Security\" />
+      <Folder Include="Schemas\" />
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="Microsoft.AspNetCore.Authentication" Version="2.3.0" />
+      <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.3.0" />
+      <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.3.0" />
       <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.0" />
     </ItemGroup>
 

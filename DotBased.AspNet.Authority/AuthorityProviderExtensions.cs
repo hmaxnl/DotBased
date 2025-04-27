@@ -41,8 +41,16 @@ public static class AuthorityProviderExtensions
         builder.Services.Configure(configureOptions);
 
         builder.Services.AddScoped<IAuthenticationService, AuthorityAuthenticationService>();
+        //TODO: Register authority default authentication handler
+        
         var authBuilder = builder.Services.AddAuthentication();
         return authBuilder;
+    }
+
+    public static AuthenticationBuilder AddAuthorityLoginScheme(this AuthenticationBuilder builder, string scheme = AuthorityDefaults.Scheme.Authority.AuthenticationScheme)
+    {
+        
+        return builder;
     }
 
     public static AuthenticationBuilder AddAuthorityCookie(this AuthenticationBuilder builder, string scheme = AuthorityDefaults.Scheme.Cookie.Default)
@@ -67,11 +75,6 @@ public static class AuthorityProviderExtensions
     {
         
         return builder;
-    }
-
-    public static AuthorityBuilder AddAuthorityRepository<TRepository>(this AuthorityBuilder authorityBuilder) where TRepository : class
-    {
-        return authorityBuilder;
     }
 
     public static AuthorityBuilder MapAuthorityEndpoints(this AuthorityBuilder builder)

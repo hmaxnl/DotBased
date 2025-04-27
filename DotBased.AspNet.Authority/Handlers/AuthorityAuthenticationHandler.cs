@@ -4,7 +4,10 @@ using Microsoft.AspNetCore.Http;
 
 namespace DotBased.AspNet.Authority.Handlers;
 
-public class AuthorityAuthenticationHandler : IAuthenticationHandler, IAuthenticationSignInHandler, IAuthenticationSignOutHandler
+/// <summary>
+/// Handles authentication for Authority logins.
+/// </summary>
+public class AuthorityAuthenticationHandler : IAuthenticationSignInHandler
 {
     public Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
     {

@@ -1,5 +1,6 @@
 using DotBased.AspNet.Authority;
 using DotBased.AspNet.Authority.EFCore;
+using DotBased.AspNet.Authority.Models.Options.Auth;
 using DotBased.Logging;
 using DotBased.Logging.MEL;
 using DotBased.Logging.Serilog;
@@ -27,7 +28,40 @@ builder.Services.AddControllers();
 builder.Services.AddAuthority().AddAuthorityContext(options =>
 {
     options.UseSqlite("Data Source=dev-authority.db", c => c.MigrationsAssembly("TestWebApi"));
-}).AddAuthorityAuth()
+}).AddAuthorityAuth(options =>
+{
+    options.DefaultScheme = AuthorityDefaults.Scheme.Authority.AuthenticationScheme;
+    //TODO: Auto detect auth and session store schemes?
+    options.SchemeMap = [
+        new SchemeInfo
+        {
+            Scheme = AuthorityDefaults.Scheme.Authority.AuthenticationScheme,
+            Identifier = "Authority password login",
+            Type = SchemeType.Authentication,
+            AuthenticationType = "Password"
+        },
+        new SchemeInfo
+        {
+            Scheme = "OIDC",
+            Identifier = "Authentik OIDC login",
+            Type = SchemeType.Authentication,
+            AuthenticationType = "OpenIdConnect"
+        },
+        new SchemeInfo
+        {
+            Scheme = AuthorityDefaults.Scheme.Cookie.Default,
+            Identifier = "Cookie session",
+            Type = SchemeType.SessionStore
+        },
+        new SchemeInfo
+        {
+            Scheme = AuthorityDefaults.Scheme.Token.Default,
+            Identifier = "Session token",
+            Type = SchemeType.SessionStore
+        }
+    ];
+})
+.AddAuthorityLoginScheme()
 .AddAuthorityCookie()
 .AddAuthorityToken();
 

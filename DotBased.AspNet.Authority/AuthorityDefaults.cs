@@ -4,6 +4,11 @@ public static class AuthorityDefaults
 {
     public static class Scheme
     {
+        public static class Authority
+        {
+            public const string AuthenticationScheme = "Authority.Scheme.Password";
+        }
+        
         public static class Cookie
         {
             public const string Default = "Authority.Scheme.Cookie";

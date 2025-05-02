@@ -10,13 +10,16 @@ public class AuthorityAuthenticationOptions
     public string DefaultForbidScheme { get; set; } = string.Empty;
     public string DefaultSignInScheme { get; set; } = string.Empty;
     public string DefaultSignOutScheme { get; set; } = string.Empty;
-    public List<SchemeInfo> SchemeMap { get; set; } = [];
+    /// <summary>
+    /// List of schemes that the Authority application will support to authenticate against.
+    /// </summary>
+    public List<SchemeInfo> SchemeInfoMap { get; set; } = [];
 }
 
 public class SchemeInfo
 {
     public string Scheme { get; set; } = string.Empty;
-    public string Identifier { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
     public SchemeType Type { get; set; }
     public string AuthenticationType { get; set; } = string.Empty;
 }

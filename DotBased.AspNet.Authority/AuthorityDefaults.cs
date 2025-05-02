@@ -6,18 +6,18 @@ public static class AuthorityDefaults
     {
         public static class Authority
         {
-            public const string AuthenticationScheme = "Authority.Scheme.Password";
+            public const string AuthenticationScheme = "AuthorityLogin";
         }
         
         public static class Cookie
         {
-            public const string Default = "Authority.Scheme.Cookie";
+            public const string AuthenticationScheme = "AuthorityCookie";
             public const string CookieName = "AuthorityAuth";
         }
         
         public static class Token
         {
-            public const string Default = "Authority.Scheme.Token";
+            public const string AuthenticationScheme = "AuthorityToken";
             public const string TokenName = "AuthorityAuthToken";
         }
     }

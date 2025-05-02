@@ -1,4 +1,5 @@
 using DotBased.AspNet.Authority.Crypto;
+using DotBased.AspNet.Authority.Handlers;
 using DotBased.AspNet.Authority.Managers;
 using DotBased.AspNet.Authority.Models.Options;
 using DotBased.AspNet.Authority.Models.Options.Auth;
@@ -33,29 +34,41 @@ public static class AuthorityProviderExtensions
         return new AuthorityBuilder(services);
     }
 
-    public static AuthenticationBuilder AddAuthorityAuth(this AuthorityBuilder builder) => AddAuthorityAuth(builder, _ => { });
-
     public static AuthenticationBuilder AddAuthorityAuth(this AuthorityBuilder builder, Action<AuthorityAuthenticationOptions> configureOptions)
     {
         ArgumentNullException.ThrowIfNull(configureOptions);
         builder.Services.Configure(configureOptions);
 
         builder.Services.AddScoped<IAuthenticationService, AuthorityAuthenticationService>();
-        //TODO: Register authority default authentication handler
         
-        var authBuilder = builder.Services.AddAuthentication();
+        var authorityOptions = new AuthorityAuthenticationOptions();
+        configureOptions.Invoke(authorityOptions);
+
+        var authBuilder = builder.Services.AddAuthentication(options =>
+        {
+            options.DefaultScheme = authorityOptions.DefaultScheme;
+            options.DefaultAuthenticateScheme = authorityOptions.DefaultAuthenticateScheme;
+            options.DefaultChallengeScheme = authorityOptions.DefaultChallengeScheme;
+            options.DefaultSignInScheme = authorityOptions.DefaultSignInScheme;
+            options.DefaultSignOutScheme = authorityOptions.DefaultSignOutScheme;
+            options.DefaultForbidScheme = authorityOptions.DefaultForbidScheme;
+        });
         return authBuilder;
     }
 
-    public static AuthenticationBuilder AddAuthorityLoginScheme(this AuthenticationBuilder builder, string scheme = AuthorityDefaults.Scheme.Authority.AuthenticationScheme)
+    public static AuthenticationBuilder AddAuthorityLoginScheme(this AuthenticationBuilder builder, string scheme) =>
+        AddAuthorityLoginScheme(builder, scheme, _ => { });
+    public static AuthenticationBuilder AddAuthorityLoginScheme(this AuthenticationBuilder builder,
+        string scheme,
+        Action<AuthorityLoginOptions> configureOptions)
     {
-        
+        builder.AddScheme<AuthorityLoginOptions, AuthorityLoginAuthenticationHandler>(scheme, scheme, configureOptions);
         return builder;
     }
 
-    public static AuthenticationBuilder AddAuthorityCookie(this AuthenticationBuilder builder, string scheme = AuthorityDefaults.Scheme.Cookie.Default)
+    public static AuthenticationBuilder AddAuthorityCookie(this AuthenticationBuilder builder, string scheme)
     {
-        builder.AddCookie(options =>
+        builder.AddCookie(scheme, options =>
         {
             options.Cookie.Name = AuthorityDefaults.Scheme.Cookie.CookieName;
             options.Cookie.Path = AuthorityDefaults.Paths.Default;
@@ -71,7 +84,7 @@ public static class AuthorityProviderExtensions
         return builder;
     }
 
-    public static AuthenticationBuilder AddAuthorityToken(this AuthenticationBuilder builder, string scheme = AuthorityDefaults.Scheme.Token.Default)
+    public static AuthenticationBuilder AddAuthorityToken(this AuthenticationBuilder builder, string scheme)
     {
         
         return builder;

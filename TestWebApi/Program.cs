@@ -25,45 +25,49 @@ builder.Logging.AddDotBasedLoggerProvider(LogService.Options);
 
 builder.Services.AddControllers();
 
-builder.Services.AddAuthority().AddAuthorityContext(options =>
+builder.Services.AddAuthority()
+.AddAuthorityContext(options =>
 {
     options.UseSqlite("Data Source=dev-authority.db", c => c.MigrationsAssembly("TestWebApi"));
-}).AddAuthorityAuth(options =>
+})
+.MapAuthorityEndpoints()
+.AddAuthorityAuth(options =>
 {
-    options.DefaultScheme = AuthorityDefaults.Scheme.Authority.AuthenticationScheme;
-    //TODO: Auto detect auth and session store schemes?
-    options.SchemeMap = [
+    options.DefaultScheme = AuthorityDefaults.Scheme.Cookie.AuthenticationScheme;
+    options.DefaultSignInScheme = AuthorityDefaults.Scheme.Authority.AuthenticationScheme;
+    options.DefaultChallengeScheme = AuthorityDefaults.Scheme.Authority.AuthenticationScheme;
+    options.SchemeInfoMap = [
         new SchemeInfo
         {
             Scheme = AuthorityDefaults.Scheme.Authority.AuthenticationScheme,
-            Identifier = "Authority password login",
+            Description = "Authority password login",
             Type = SchemeType.Authentication,
             AuthenticationType = "Password"
         },
-        new SchemeInfo
+        /*new SchemeInfo
         {
             Scheme = "OIDC",
-            Identifier = "Authentik OIDC login",
+            Description = "Authentik OIDC login",
             Type = SchemeType.Authentication,
             AuthenticationType = "OpenIdConnect"
-        },
+        },*/
         new SchemeInfo
         {
-            Scheme = AuthorityDefaults.Scheme.Cookie.Default,
-            Identifier = "Cookie session",
+            Scheme = AuthorityDefaults.Scheme.Cookie.AuthenticationScheme,
+            Description = "Cookie session",
             Type = SchemeType.SessionStore
-        },
+        }/*,
         new SchemeInfo
         {
-            Scheme = AuthorityDefaults.Scheme.Token.Default,
-            Identifier = "Session token",
+            Scheme = AuthorityDefaults.Scheme.Token.AuthenticationScheme,
+            Description = "Session token",
             Type = SchemeType.SessionStore
-        }
+        }*/
     ];
 })
-.AddAuthorityLoginScheme()
-.AddAuthorityCookie()
-.AddAuthorityToken();
+.AddAuthorityLoginScheme(AuthorityDefaults.Scheme.Authority.AuthenticationScheme)
+.AddAuthorityCookie(AuthorityDefaults.Scheme.Cookie.AuthenticationScheme)
+.AddAuthorityToken(AuthorityDefaults.Scheme.Token.AuthenticationScheme);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -96,9 +100,4 @@ ILogger SetupSerilog()
         .MinimumLevel.Verbose()
         .WriteTo.Console(outputTemplate: BasedSerilog.OutputTemplate);
     return logConfig.CreateLogger();
-}
-
-public record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 }

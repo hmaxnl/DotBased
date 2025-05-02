@@ -1,16 +1,24 @@
 using System.Text.Json;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DotBased.AspNet.Authority.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Microsoft.AspNetCore.Mvc.Route("[controller]")]
 public class AuthorityController : ControllerBase
 {
+    [Inject]
+    public IAuthenticationService AuthenticationService { get; set; }
+    
     [HttpGet("auth/login")]
-    public async Task<ActionResult> LoginFromSchemeAsync([FromQuery(Name = "s")] string scheme)
+    [AllowAnonymous]
+    public async Task<ActionResult> LoginFromSchemeAsync([FromQuery(Name = "s")] string? scheme)
     {
-        return BadRequest();
+        var authResult = await HttpContext.AuthenticateAsync();
+        return Ok();
     }
 
     [HttpGet("auth/logout")]

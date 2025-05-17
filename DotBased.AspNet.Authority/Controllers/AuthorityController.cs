@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -8,14 +7,13 @@ namespace DotBased.AspNet.Authority.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class AuthorityController : ControllerBase
+public class AuthorityController(IAuthenticationService authenticationService) : ControllerBase
 {
     [HttpGet("auth/login")]
     [AllowAnonymous]
-    public async Task<ActionResult> LoginFromSchemeAsync([FromQuery(Name = "s")] string? scheme)
+    public async Task<ActionResult> LoginFromSchemeAsync([FromQuery(Name = "s")] string? scheme, [FromQuery(Name = "ss")] string? sessionScheme)
     {
-        var cPrincipal = new ClaimsPrincipal();
-        await HttpContext.SignInAsync(cPrincipal);
+        await authenticationService.AuthenticateAsync(HttpContext, scheme);
         return Ok();
     }
 

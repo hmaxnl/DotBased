@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text.Encodings.Web;
 using DotBased.AspNet.Authority.Managers;
 using DotBased.AspNet.Authority.Models.Options.Auth;
@@ -16,8 +17,10 @@ public class AuthorityLoginAuthenticationHandler(IOptionsMonitor<AuthorityLoginO
     AuthorityManager manager) : AuthenticationHandler<AuthorityLoginOptions>(options, logger, encoder)
 {
     // Validate credentials
-    protected override Task<AuthenticateResult> HandleAuthenticateAsync()
+    protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        throw new NotImplementedException();
+        var ticket = new AuthenticationTicket(new ClaimsPrincipal(), Scheme.Name);
+        var result = AuthenticateResult.Success(ticket);
+        return result;
     }
 }

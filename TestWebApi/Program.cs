@@ -34,6 +34,7 @@ builder.Services.AddAuthority()
 .AddAuthorityAuth(options =>
 {
     options.DefaultScheme = AuthorityDefaults.Scheme.Authority.AuthenticationScheme;
+    options.DefaultAuthenticateScheme = AuthorityDefaults.Scheme.Authority.AuthenticationScheme;
     options.DefaultSignInScheme = AuthorityDefaults.Scheme.Cookie.AuthenticationScheme;
     options.DefaultSignOutScheme = AuthorityDefaults.Scheme.Cookie.AuthenticationScheme;
     options.SchemeInfoMap = [

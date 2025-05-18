@@ -33,23 +33,25 @@ builder.Services.AddAuthority()
 .MapAuthorityEndpoints()
 .AddAuthorityAuth(options =>
 {
-    options.DefaultScheme = AuthorityDefaults.Scheme.Cookie.AuthenticationScheme;
-    options.DefaultSignInScheme = AuthorityDefaults.Scheme.Authority.AuthenticationScheme;
-    options.DefaultSignOutScheme = AuthorityDefaults.Scheme.Authority.AuthenticationScheme;
+    options.DefaultScheme = AuthorityDefaults.Scheme.Authority.AuthenticationScheme;
+    options.DefaultSignInScheme = AuthorityDefaults.Scheme.Cookie.AuthenticationScheme;
+    options.DefaultSignOutScheme = AuthorityDefaults.Scheme.Cookie.AuthenticationScheme;
     options.SchemeInfoMap = [
         new SchemeInfo
         {
             Scheme = AuthorityDefaults.Scheme.Authority.AuthenticationScheme,
             Description = "Authority password login",
             Type = SchemeType.Authentication,
-            AuthenticationType = "Password"
+            AuthenticationType = "Password",
+            Endpoint = AuthorityDefaults.Paths.Login
         },
         /*new SchemeInfo
         {
             Scheme = "OIDC",
             Description = "Authentik OIDC login",
             Type = SchemeType.Authentication,
-            AuthenticationType = "OpenIdConnect"
+            AuthenticationType = "OpenIdConnect",
+            Endpoint = AuthorityDefaults.Paths.Challenge
         },*/
         new SchemeInfo
         {

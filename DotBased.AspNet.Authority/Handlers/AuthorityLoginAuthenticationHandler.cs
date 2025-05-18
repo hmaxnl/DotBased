@@ -19,8 +19,9 @@ public class AuthorityLoginAuthenticationHandler(IOptionsMonitor<AuthorityLoginO
     // Validate credentials
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        var ticket = new AuthenticationTicket(new ClaimsPrincipal(), Scheme.Name);
-        var result = AuthenticateResult.Success(ticket);
+        //TODO: Check headers for login credentials.
+        /*var ticket = new AuthenticationTicket(new ClaimsPrincipal(), Scheme.Name);*/
+        var result = AuthenticateResult.Fail("No login found!");
         return result;
     }
 }

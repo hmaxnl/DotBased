@@ -27,7 +27,7 @@ public class AuthorityAuthenticationService(
         return base.AuthenticateAsync(context, scheme);
     }
 
-    // Trigger login
+    // Trigger login - Redirects to provider (OIDC, etc.)
     // Used when access to a resource requires authentication, but the user has not provided valid credentials.
     public override Task ChallengeAsync(HttpContext context, string? scheme, AuthenticationProperties? properties)
     {

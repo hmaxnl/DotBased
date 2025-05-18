@@ -22,6 +22,7 @@ public class SchemeInfo
     public string Description { get; set; } = string.Empty;
     public SchemeType Type { get; set; }
     public string AuthenticationType { get; set; } = string.Empty;
+    public string? Endpoint { get; set; }
 }
 
 public enum SchemeType

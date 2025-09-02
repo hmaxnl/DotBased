@@ -1,0 +1,182 @@
+{
+  "main": {
+    "id": "036516b320d15f05",
+    "type": "split",
+    "children": [
+      {
+        "id": "89533e49f06550fb",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "65943ca25b411f17",
+            "type": "leaf",
+            "state": {
+              "type": "empty",
+              "state": {},
+              "icon": "lucide-file",
+              "title": "New tab"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "97d2b7eaa5b0817b",
+    "type": "split",
+    "children": [
+      {
+        "id": "4ab704d9f07468d7",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "2dcd0dffd753993c",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "4a5d90d4f8e6e8b9",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "26ebe543611d3a9b",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "37b39260b7304344",
+    "type": "split",
+    "children": [
+      {
+        "id": "233acbe146cb7e31",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "61d17c9ee7d66c50",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "Modules/AspNet/DotBased.Authority/Repositories/UserRepository.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for UserRepository"
+            }
+          },
+          {
+            "id": "9edca2501ca8fc8d",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "Modules/AspNet/DotBased.Authority/Repositories/UserRepository.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from UserRepository"
+            }
+          },
+          {
+            "id": "a0b5dc7ca04cc4f8",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "25f7df275652ff82",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Modules/AspNet/DotBased.Authority/Repositories/UserRepository.md"
+              },
+              "icon": "lucide-list",
+              "title": "Outline of UserRepository"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false
+    }
+  },
+  "active": "65943ca25b411f17",
+  "lastOpenFiles": [
+    "Modules/AspNet/DotBased.Authority/Repositories/UserRepository.md",
+    "Modules/AspNet/DotBased.Authority/Repository.md",
+    "Modules/AspNet/DotBased.Authority/Repositories",
+    "Modules/AspNet/DotBased.Authority/Data diagram.canvas",
+    "Modules/AspNet/DotBased.Authority/Models/AuthorityAttribute.md",
+    "Modules/AspNet/DotBased.Authority/Models/AuthorityUser.md",
+    "Modules/AspNet/DotBased.Authority/Models/AuthorityRole.md",
+    "Modules/AspNet/DotBased.Authority/Models/AuthorityGroup.md",
+    "Modules/AspNet/DotBased.Authority/Models",
+    "Untitled.canvas",
+    "Modules/AspNet/DotBased.Authority.md",
+    "Modules/AspNet/DotBased.Authority",
+    "DotBased.md",
+    "Modules/Untitled",
+    "Modules/DotBased.Data",
+    "Modules/AspNet",
+    "Modules",
+    "Welcome.md"
+  ]
+}
